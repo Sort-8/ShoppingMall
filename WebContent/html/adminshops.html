@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>商品管理</title>
+	</head>
+	<link rel="stylesheet" type="text/css" href="../res/layui/css/layui.css" />
+	<script type="text/javascript" src="../res/js/echarts.min.js"></script>
+	<script type="text/javascript" src="../res/js/jquery-3.5.1.js"></script>
+	<script type="text/javascript" src="../res/layui/layui.js"></script>
+
+	<script type="text/javascript">
+		//跳转到登录界面
+		function jumpLogin() {
+			window.parent.location.href = "adminlogin.html";
+			window.location.close();
+		}
+	</script>
+
+	<script type="text/javascript">
+		//判断是否已登录，防止跨域请求
+		$(function() {
+			if (localStorage.userid != undefined) {
+				var userid = localStorage.userid;
+			} else {
+				alert("请登录");
+				jumpLogin();
+			}
+		});
+	</script>
+
+	<script type="text/javascript">
+		//会话过期函数
+		function RequestError() {
+			localStorage.clear();
+			alert("会话已过期，请登录");
+			jumpLogin();
+		}
+	</script>
+
+	<style type="text/css">
+		/*设置数据表表头*/
+		.layui-table th {
+			text-align: center;
+			/*表头居中*/
+		}
+
+		.layui-table td {
+			text-align: center;
+			/*表格数据居中*/
+		}
+
+		.layui-table-cell {
+			text-align: center;
+			height: 50px;
+			white-space: normal;
+		}
+
+		.layui-table img {
+			max-width: 100px
+		}
+	</style>
+
+	<script type="text/html" id="toolbarDemo">
+		<div class="layui-btn-container">
+			<button class="layui-btn layui-btn-sm" lay-event="add">上架商品</button>
+			<button class="layui-btn layui-btn-sm" lay-event="del">下架商品</button>
+		</div>
+	</script>
+
+	<script type="text/html" id="barDemo">
+		<a class="layui-btn layui-btn-xs" lay-event="edit_shops">修改</a>
+		<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del_shops">下架</a>
+	</script>
+
+	<script type="text/javascript">
+		//渲染商品列表
+		layui.use(['upload', 'table'], function() {
+			var table = layui.table;
+			var upload = layui.upload;
+			var tableIns = table.render({
+				elem: '#adminshop_table',
+				url: 'GoodsController',
+				method: 'post',
+				toolbar: '#toolbarDemo', //开启头部工具栏
+				title: 'adminshop_table',
+				headers: {
+					"token": localStorage.token
+				},
+				id: 'adminshop_table',
+				cols: [
+					[ //表格字段参数
+						{
+							checkbox: true,
+							fixed: true
+						}, {
+							field: 'goodsid',
+							title: '商品编号',
+							width: 250,
+							sort: true
+						}, {
+							field: 'title',
+							title: '商品名称',
+							width: 180
+						}, {
+							field: 'type',
+							title: '商品类别',
+							width: 150
+						}, {
+							field: 'img',
+							title: '图片',
+							width: 130,
+							templet: '<div><img src="{{d.img}}"></div>',
+						}, {
+							field: 'price',
+							title: '单价',
+							width: 100,
+							sort: true
+						}, {
+							field: 'count',
+							title: '库存',
+							width: 100,
+							sort: true
+						}, {
+							field: 'createtime',
+							title: '上架时间',
+							width: 180,
+							sort: true
+						}, {
+							fixed: 'right',
+							title: '操作',
+							toolbar: '#barDemo',
+							width: 130
+						}
+					]
+				],
+				page: true,
+				where: {
+					method: "getAllShops",
+				},
+				parseData: function(res) { //将原始解析成layui支持的数据
+					if (res.msg != "success") {
+						// RequestError();
+					}
+					if (this.page.curr) {
+						result = res.item.slice(this.limit * (this.page.curr - 1), this.limit * this.page.curr);
+					} else {
+						result = res.item.slice(0, this.limit);
+					}
+					return {
+						"code": res.code, //解析接口状态
+						"msg": res.msg, //解析提示文本
+						"data": result, //解析数据列表
+						"count": res.item.length
+					};
+				},
+
+			});
+
+			//组合搜索+模糊搜索
+			var $ = layui.$,
+				active = {
+					reload: function() {
+						var goodsid = $('#shopsid');
+						var goodstitle = $('#shopstitle');
+						var goodstype = $('#shopstype');
+						tableIns.reload({
+							headers: {
+								"token": localStorage.token
+							},
+							page: {
+								curr: 1 //重新从第 1 页开始
+							},
+							where: {
+								goodsid: goodsid.val(),
+								goodstitle: goodstitle.val(),
+								goodstype: goodstype.val(),
+								method: "searchShops"
+							}
+						}, 'data');
+					}
+				};
+
+			/*绑定搜索点击事件*/
+			$('#searchBtn').on('click', function() {
+				var type = $(this).data('type');
+				active[type] ? active[type].call(this) : '';
+			});
+
+			//头工具栏事件
+			table.on('toolbar(adminshop_table)', function(obj) {
+				var checkStatus = table.checkStatus(obj.config.id);
+				switch (obj.event) {
+					case 'add': //上架商品
+						layer.open({
+							type: 1,
+							title: ["上架商品", 'font-size:14px;'],
+							area: ['500px', '600px'], //宽高
+							btn: ['确定添加', '取消添加'],
+							content: $('#edit_shops_div'),
+							success: function(index, layero) {
+								//多图片上传
+								upload.render({
+									elem: '#uploadimg',
+									headers: {
+										"token": localStorage.token
+									},
+									url: 'GoodsController?method=uploadShopsImg', //改成您自己的上传接口
+									multiple: true,
+									exts: 'jpg', //只允许上传jpg
+									size: 500, //限制文件大小，单位 KB
+									before: function(obj) {
+										//预读本地文件示例，不支持ie8
+										obj.preview(function(index, file, result) {
+											$('#demo2').append('<img style="winth:50px;height:50px" id="add_img" src="' + result + '" alt="' +
+												file.name +
+												'" class="layui-upload-img">')
+										});
+									},
+									done: function(res) {
+										layer.msg("上传完毕");
+										console.log(res)
+									}
+								});
+							},
+							yes: function(index, layero) { //确定按钮
+								if (layero.find("#add_name").val() != "" && layero.find("#add_type").val() != "" &&
+									layero.find("#add_price").val() != "" && layero.find("#add_size").val() != "" &&
+									layero.find("#add_color").val() != "" && layero.find("#add_count").val() != "") {
+									$.ajax({
+										type: 'post',
+										url: "GoodsController",
+										data: {
+											goodstitle: layero.find("#add_name").val(),
+											goodstype: layero.find("#add_type").val(),
+											goodsprice: layero.find("#add_price").val(),
+											goodssize: layero.find("#add_size").val(),
+											goodscolor: layero.find("#add_color").val(),
+											goodscount: layero.find("#add_count").val(),
+											method: "addGoods",
+										},
+										headers: {
+											"token": localStorage.token
+										},
+										dataType: "json",
+										success: function(res) {
+											if (res.msg == "success") {
+												layer.msg("上架成功");
+											} else {
+												// RequestError();
+											}
+											layer.close(index);
+										}
+									})
+									tableIns.reload();
+									layer.close(layer.index);
+								} else {
+									layer.msg("必填项不能为空");
+								}
+							},
+							end: function(index, layero) {
+								$("#add_shops")[0].reset();
+								return false;
+							},
+						})
+						break;
+					case 'del': //批量下架商品
+						var arr = checkStatus.data;
+						var data = [];
+						for (let i in arr) {
+							data.push(arr[i]['goodsid']);
+						}
+						console.log(JSON.stringify(data));
+						// console.log(checkStatus);
+						console.log(data.length)
+						if (data == null) {
+							layer.msg("还没有选中")
+						}
+						layer.confirm('确定下架吗？', {
+							title: '下架'
+						}, function(index) {
+							$.ajax({
+								type: 'post',
+								url: 'GoodsController',
+								headers: {
+									"token": localStorage.token
+								},
+								data: {
+									goodsid: JSON.stringify(data),
+									method: "delDozenGoods"
+								},
+								success: function(res) {
+									if (res.msg == "success") {
+										layer.msg("下架成功");
+									} else {
+										// RequestError();
+									}
+									table.reload('adminshop_table', {})
+								}
+							})
+							layer.close(index);
+						});
+						break;
+				}
+			});
+
+			//监听行工具事件
+			table.on('tool(adminshop_table)', function(obj) {
+				var data = obj.data; //拿到选中的一行数据
+				console.log(data)
+				var goodsid = data.goodsid;
+				if (obj.event == 'del_shops') { //删除
+					layer.confirm('确定下架吗？', {
+						title: '下架'
+					}, function(index) {
+						$.ajax({
+							type: 'post',
+							url: 'GoodsController',
+							headers: {
+								"token": localStorage.token
+							},
+							data: {
+								goodsid: goodsid,
+								method: "delGoods"
+							},
+							success: function(res) {
+								if (res.msg == "success") {
+									layer.msg("下架成功");
+								} else {
+									// RequestError();
+								}
+							}
+						})
+						$("#add_shops")[0].reset();
+						tableIns.reload();
+						layer.close(layer.index);
+					});
+				} else if (obj.event == 'edit_shops') {
+					layer.open({
+						type: 1,
+						title: ["修改商品", 'font-size:14px;'],
+						area: ['450px', '480px'],
+						btn: ['确定', '取消'],
+						content: $('#edit_shops_div'),
+						success: function(layero, index) {
+							layero.find("#add_name").val(data.title); //赋值
+							layero.find("#add_type").val(data.type); //赋值
+							layero.find("#add_price").val(data.price); //赋值
+							layero.find("#add_count").val(data.count); //赋值
+						},
+						end: function(index, layero) { //取消按钮
+							layer.close(index);
+							$("#add_shops")[0].reset();
+							return false;
+						},
+						yes: function(index, layero) { //确定按钮
+							$.ajax({
+								type: 'post',
+								url: 'GoodsController',
+								headers: {
+									"token": localStorage.token
+								},
+								data: {
+									"goodsid": goodsid, //原商品名称
+									"goodstitle": layero.find("#add_name").val(), //更名后的商品名称
+									"goodstype": layero.find("#add_type").val(), //更名后的商品类型
+									"goodsprice": layero.find("#add_price").val(), //更名后的商品单价
+									"goodssize": layero.find("#add_size").val(), //更名后的商品规格
+									"goodscount": layero.find("#add_count").val(), //更名后的商品规格
+									"method": "editGoods",
+								},
+								success: function(res) {
+									if (res.msg == "success") {
+										layer.msg("修改成功");
+									} else {
+										// RequestError();
+									}
+								}
+							})
+							tableIns.reload();
+							layer.close(layer.index);
+						},
+						end: function(index, layero) {
+							$("#add_shops")[0].reset();
+							return false;
+						},
+					});
+				}
+			});
+
+		})
+	</script>
+	<body>
+		<div class="layui-row layui-col-space20">
+			<div class="layui-col-md12">
+				<div class="layui-card" style="background-color: #FFFFFF;">
+					<div class="layui-card-header">组合搜索</div>
+					<div class="layui-card-body">
+						<div class="demoTable">
+							<form class="layui-form layui-form-pane" method="post" id="searchshops">
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">商品编号</label>
+									<div class="layui-input-block" style="width: 200px;">
+										<input id="shopsid" name="shopsid" placeholder="请输入商品编号" autocomplete="off" class="layui-input">
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">商品名</label>
+									<div class="layui-input-block" style="width: 200px;">
+										<input id="shopstitle" name="shopstitle" placeholder="请输入商品名" autocomplete="off" class="layui-input">
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">商品类别</label>
+									<div class="layui-input-block" style="width: 200px;">
+										<input id="shopstype" name="shopstype" placeholder="请输入商品类别" autocomplete="off" class="layui-input">
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<!-- 一定要加 type="button" 否则这个button标签会自动重载表格  -->
+									<button type="button" id="searchBtn" class="layui-btn layui-inline" data-type="reload" style="margin-left: 15px">
+										<i class="layui-icon layui-icon-search">查询</i>
+									</button>
+									<button type="reset" class="layui-btn layui-inline" style="width: 93px;">重置</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<table class="layui-hide" id="adminshop_table" lay-filter="adminshop_table"></table>
+
+		<div id="edit_shops_div" style="margin: 8%; display:none;">
+			<form class="layui-form layui-form-pane" method="post" id="add_shops">
+				<div class="layui-form-item">
+					<label class="layui-form-label">商品名</label>
+					<div class="layui-input-block">
+						<input type="text" id="add_name" name="add_name" required lay-verify="required" placeholder="请输入商品名" autocomplete="off"
+						 class="layui-input" style="width: 250px;">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">商品类型</label>
+					<div class="layui-input-block">
+						<input type="text" id="add_type" name="add_type" required lay-verify="required" placeholder="请输入商品类别"
+						 autocomplete="off" class="layui-input" style="width: 250px;">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">单价</label>
+					<div class="layui-input-block">
+						<input type="text" id="add_price" name="add_price" required lay-verify="required" placeholder="请输入单价"
+						 autocomplete="off" class="layui-input" style="width: 250px;">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">尺码</label>
+					<div class="layui-input-block">
+						<input type="text" id="add_size" name="add_size" required lay-verify="required" placeholder="请输入商品各种规格，用;分隔"
+						 autocomplete="off" class="layui-input" style="width: 250px;">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">颜色</label>
+					<div class="layui-input-block">
+						<input type="text" id="add_color" name="add_color" required lay-verify="required" placeholder="请输入商品各种规格，用;分隔"
+						 autocomplete="off" class="layui-input" style="width: 250px;">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">数量</label>
+					<div class="layui-input-block">
+						<input type="text" id="add_count" name="add_count" required lay-verify="required" placeholder="请输入商品各种规格数量，用;分隔"
+						 autocomplete="off" class="layui-input" style="width: 250px;">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<div class="layui-upload">
+						<button type="button" class="layui-btn" id="uploadimg">多图片上传</button>
+						<blockquote class="layui-elem-quote layui-quote-nm" style="margin-top: 10px;">
+							预览图：
+							<div class="layui-upload-list" id="demo2" style="width: 400px;height:100px ;"></div>
+						</blockquote>
+					</div>
+				</div>
+			</form>
+		</div>
+	</body>
+</html>

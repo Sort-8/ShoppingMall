@@ -1,0 +1,14 @@
+{
+	"code": 0,
+	"msg":"success",
+	"item": 
+		[{
+            "createtime": "2021-02-27 10:40:27",
+			"type":"袜子",
+            "goodsid": "1234",
+            "title": 2,
+            "price": "12312",
+            "count": "1231",
+			"img":"https://mall-1305004688.cos.ap-nanjing.myqcloud.com/more3.jpg"
+        }]
+}

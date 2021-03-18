@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>评论管理</title>
+	</head>
+	<link rel="stylesheet" type="text/css" href="../res/layui/css/layui.css" />
+	<script type="text/javascript" src="../res/js/echarts.min.js"></script>
+	<script type="text/javascript" src="../res/js/jquery-3.5.1.js"></script>
+	<script type="text/javascript" src="../res/layui/layui.js"></script>
+
+	<script type="text/javascript">
+		//跳转到登录界面
+		function jumpLogin() {
+			window.parent.location.href = "adminlogin.html";
+			window.location.close();
+		}
+	</script>
+
+	<script type="text/javascript">
+		//判断是否已登录，防止跨域请求
+		$(function() {
+			if (localStorage.userid != undefined) {
+				var userid = localStorage.userid;
+			} else {
+				alert("请登录");
+				jumpLogin();
+			}
+		});
+	</script>
+
+	<script type="text/javascript">
+		//会话过期函数
+		function RequestError() {
+			localStorage.clear();
+			alert("会话已过期，请登录");
+			jumpLogin();
+		}
+	</script>
+
+	<style type="text/css">
+		/*设置数据表表头*/
+		.layui-table th {
+			text-align: center;
+			/*表头居中*/
+		}
+
+		.layui-table td {
+			text-align: center;
+			/*表格数据居中*/
+		}
+	</style>
+
+	<script type="text/html" id="barDemo">
+		<a class="layui-btn layui-btn-xs" lay-event="edit_comment">审核</a>
+		<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del_comment">删除</a>
+	</script>
+
+	<script type="text/javascript">
+		//渲染评论表格
+		layui.use('table', function() {
+			var table = layui.table;
+			var tableIns = table.render({
+				elem: '#admincomment_table',
+				url: 'CommentController',
+				method: 'post',
+				toolbar: '#toolbarDemo', //开启头部工具栏
+				title: 'admincomment_table',
+				headers: {
+					"token": localStorage.token
+				},
+				id: 'admincomment_table',
+				cols: [
+					[ //表格字段参数
+						{
+							checkbox: true,
+							fixed: true
+						}, {
+							field: 'commentid',
+							title: '评论编号',
+							width: 120,
+							sort: true
+						}, {
+							field: 'username',
+							title: '评论者',
+							width: 110
+						}, {
+							field: 'comment',
+							title: '评论内容',
+							width: 300
+						}, {
+							field: 'createtime',
+							title: '评论时间',
+							width: 180,
+							sort: true
+						}, {
+							field: 'status',
+							title: '状态',
+							width: 120,
+						}, {
+							fixed: 'right',
+							title: '操作',
+							toolbar: '#barDemo',
+							width: 180
+						}
+					]
+				],
+				page: true,
+				where: {
+					method: "getAllComment",
+				},
+				parseData: function(res) { //将原始解析成layui支持的数据
+					if (res.msg != "success") {
+						RequestError();
+					}
+					if (this.page.curr) {
+						result = res.item.slice(this.limit * (this.page.curr - 1), this.limit * this.page.curr);
+					} else {
+						result = res.item.slice(0, this.limit);
+					}
+					return {
+						"code": res.code, //解析接口状态
+						"msg": res.msg, //解析提示文本
+						"data": result, //解析数据列表
+						"count": res.item.length
+					};
+				}
+			});
+
+			//组合搜索+模糊搜索
+			var $ = layui.$,
+				active = {
+					reload: function() {
+						var commentid = $('#commentid');
+						var username = $('#username');
+						var comment = $('#comment');
+						tableIns.reload({
+							headers: {
+								"token": localStorage.token
+							},
+							page: {
+								curr: 1 //重新从第 1 页开始
+							},
+							where: {
+								commentid: commentid.val(),
+								username: username.val(),
+								comment: comment.val(),
+								method: "searchComment"
+							}
+						}, 'data');
+					}
+				};
+
+			/*绑定搜索点击事件*/
+			$('#searchBtn').on('click', function() {
+				var type = $(this).data('type');
+				active[type] ? active[type].call(this) : '';
+			});
+
+			//监听行工具事件
+			table.on('tool(admincomment_table)', function(obj) {
+				var data = obj.data; //拿到选中的一行数据
+				// console.log(data)
+				var commentid = data.commentid;
+				// console.log(commentid)
+				var status = data.status;
+				console.log(status)
+				if (obj.event == 'del_comment') { //删除
+					layer.confirm('确定删除吗？', {
+						title: '删除'
+					}, function(index) {
+						$.ajax({
+							type: 'post',
+							url: 'CommentController',
+							headers: {
+								"token": localStorage.token
+							},
+							data: {
+								commentid: commentid,
+								method: "delComment"
+							},
+							success: function(res) {
+								if (res.msg == "success") {
+									layer.msg("删除成功");
+								} else {
+									RequestError();
+								}
+								tableIns.reload();
+							}
+						})
+						layer.close(index);
+					});
+				} else if (obj.event == 'edit_comment') { //修改
+					if (status == "未审核") {
+						$.ajax({
+							type: 'post',
+							url: 'CommentController',
+							headers: {
+								"token": localStorage.token
+							},
+							data: {
+								commentid: commentid,
+								status: "已审核",
+								method: "editCommentStatus"
+							},
+							success: function(res) {
+								if (res.msg == "success") {
+									layer.msg("审核成功");
+								} else {
+									RequestError();
+								}
+								tableIns.reload();
+							}
+						})
+					} else {
+						layer.msg("已通过审核，无需操作")
+					}
+				}
+			});
+		})
+	</script>
+	<body>
+		<div class="layui-row layui-col-space20">
+			<div class="layui-col-md12">
+				<div class="layui-card" style="background-color: #FFFFFF;">
+					<div class="layui-card-header">组合搜索</div>
+					<div class="layui-card-body">
+						<div class="demoTable">
+							<form class="layui-form layui-form-pane" method="post" id="searchshops">
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">评论编号</label>
+									<div class="layui-input-block" style="width: 200px;">
+										<input id="commentid" name="commentid" placeholder="请输入评论编号" autocomplete="off" class="layui-input">
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">用户名</label>
+									<div class="layui-input-block" style="width: 200px;">
+										<input id="username" name="username" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">评论内容</label>
+									<div class="layui-input-block" style="width: 200px;">
+										<input id="comment" name="comment" placeholder="请输入评论内容" autocomplete="off" class="layui-input">
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<!-- 一定要加 type="button" 否则这个button标签会自动重载表格  -->
+									<button type="button" id="searchBtn" class="layui-btn layui-inline" data-type="reload" style="margin-left: 15px">
+										<i class="layui-icon layui-icon-search">查询</i>
+									</button>
+									<button type="reset" class="layui-btn layui-inline" style="width: 93px;">重置</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<table class="layui-hide" id="admincomment_table" lay-filter="admincomment_table"></table>
+
+	</body>
+</html>

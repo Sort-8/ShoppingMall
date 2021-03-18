@@ -1,0 +1,25 @@
+{
+	"code": "0",
+	"msg": "success",
+	"item": [{
+		"userid": "12312",
+		"username": "好嗨哦",
+		"createtime": "1232415654",
+		"power": "3"
+	},{
+		"userid": "12354",
+		"username": "好嗨哦",
+		"createtime": "1232415654",
+		"power": "2"
+	},{
+		"userid": "1231",
+		"username": "好嗨哦",
+		"createtime": "1232415654",
+		"power": "2"
+	},{
+		"userid": "123q",
+		"username": "好嗨哦",
+		"createtime": "1232415654",
+		"power": "2"
+	}]
+}

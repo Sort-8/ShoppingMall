@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>管理员设置</title>
+	</head>
+	<link rel="stylesheet" type="text/css" href="../res/layui/css/layui.css" />
+	<script type="text/javascript" src="../res/js/echarts.min.js"></script>
+	<script type="text/javascript" src="../res/js/jquery-3.5.1.js"></script>
+	<script type="text/javascript" src="../res/layui/layui.js"></script>
+
+	<script type="text/javascript">
+		//跳转到登录界面
+		function jumpLogin() {
+			window.parent.location.href = "adminlogin.html";
+			window.location.close();
+		}
+	</script>
+
+	<script type="text/javascript">
+		//判断是否已登录，防止跨域请求
+		$(function() {
+			if (localStorage.userid != undefined) {
+				var userid = localStorage.userid;
+			} else {
+				alert("请登录");
+				jumpLogin();
+			}
+		});
+	</script>
+
+	<script type="text/javascript">
+		//会话过期函数
+		function RequestError() {
+			localStorage.clear();
+			alert("会话已过期，请登录");
+			jumpLogin();
+		}
+	</script>
+
+	<style type="text/css">
+		/*设置数据表表头*/
+		.layui-table th {
+			text-align: center;
+			/*表头居中*/
+		}
+
+		.layui-table td {
+			text-align: center;
+			/*表格数据居中*/
+		}
+	</style>
+
+	<script type="text/html" id="toolbarDemo">
+		<div class="layui-btn-container">
+			<button class="layui-btn layui-btn-sm" lay-event="add">添加管理员</button>
+		</div>
+	</script>
+
+	<script type="text/html" id="barDemo">
+		<a class="layui-btn layui-btn-xs" lay-event="edit_admin">修改密码</a>
+		<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del_admin">删除</a>
+	</script>
+
+	<script type="text/javascript">
+		//渲染管理员列表
+		layui.use('table', function() {
+			var table = layui.table;
+			var tableIns = table.render({
+				elem: '#admininfo_table',
+				url: 'UserController',
+				method: 'post',
+				toolbar: '#toolbarDemo', //开启头部工具栏
+				title: 'admininfo_table',
+				headers: {
+					"token": localStorage.token
+				},
+				id: 'admininfo_table',
+				cols: [
+					[ //表格字段参数
+						{
+							field: 'userid',
+							title: '管理员帐号',
+							width: 120,
+						}, {
+							field: 'username',
+							title: '用户名',
+							width: 180
+						}, {
+							field: 'phone',
+							title: '手机',
+							width: 180
+						}, {
+							field: 'email',
+							title: '邮箱',
+							width: 180
+						}, {
+							field: 'createtime',
+							title: '创建时间',
+							width: 180,
+							sort: true
+						}, {
+							fixed: 'right',
+							title: '操作',
+							toolbar: '#barDemo',
+							width: 180
+						}
+					]
+				],
+				page: true,
+				where: {
+					method: "getAllAdmin",
+					ignore_userid: localStorage.userid
+				},
+				parseData: function(res) { //将原始解析成layui支持的数据
+					if (res.msg != "success") {
+						RequestError();
+					}
+					if (this.page.curr) {
+						result = res.item.slice(this.limit * (this.page.curr - 1), this.limit * this.page.curr);
+					} else {
+						result = res.item.slice(0, this.limit);
+					}
+					return {
+						"code": res.code, //解析接口状态
+						"msg": res.msg, //解析提示文本
+						"data": result, //解析数据列表
+						"count": res.item.length
+					};
+				}
+
+			});
+
+			//组合搜索+模糊搜索
+			var $ = layui.$,
+				active = {
+					reload: function() {
+						var userid = $('#userid');
+						var username = $('#username');
+						var phone = $('#phone');
+						tableIns.reload({
+							headers: {
+								"token": localStorage.token
+							},
+							page: {
+								curr: 1 //重新从第 1 页开始
+							},
+							where: {
+								userid: userid.val(),
+								username: username.val(),
+								phone: phone.val(),
+								method: "searchAdmins"
+							}
+						}, 'data');
+					}
+				};
+
+			/*绑定搜索点击事件*/
+			$('#searchBtn').on('click', function() {
+				var type = $(this).data('type');
+				active[type] ? active[type].call(this) : '';
+			});
+
+
+			//头工具栏事件
+			table.on('toolbar(admininfo_table)', function(obj) {
+				switch (obj.event) {
+					case 'add': //添加管理员
+						layer.open({
+							type: 1,
+							title: ["添加管理员", 'font-size:14px;'],
+							area: ['440px', '320px'], //宽高
+							btn: ['确定添加', '取消添加'],
+							content: $('#add_admin_div'),
+							yes: function(index, layero) { //确定按钮
+								if (layero.find("#add_userid").val() != "") {
+									if (layero.find("#add_password").val() == layero.find("#add_two_password").val()) {
+										$.ajax({
+											type: 'post',
+											url: "UserController",
+											data: {
+												userid: layero.find("#add_userid").val(),
+												password: layero.find("#add_password").val(),
+												method: "addAdmin",
+											},
+											headers: {
+												"token": localStorage.token
+											},
+											dataType: "json",
+											success: function(res) {
+												if (res.msg == "success") {
+													layer.msg("添加成功");
+												} else {
+													RequestError();
+												}
+												layer.close(index);
+											}
+										})
+										tableIns.reload()
+									} else {
+										layer.msg("两次输入的密码不一致");
+									}
+								} else {
+									layer.msg("帐号不能为空");
+								}
+							},
+							end: function(index, layero) {
+								layer.close(index);
+								$("#add_admin")[0].reset();
+								return false;
+							},
+						})
+						break;
+
+				}
+			});
+
+			//监听行工具事件
+			table.on('tool(admininfo_table)', function(obj) {
+				var data = obj.data; //拿到选中的一行数据
+				var userid = data.userid;
+				//console.log(data)
+				if (obj.event == 'del_admin') { //删除管理员
+					layer.confirm('确定删除吗？', {
+						title: '删除'
+					}, function(index) {
+						$.ajax({
+							type: 'post',
+							url: 'UserController',
+							headers: {
+								"token": localStorage.token
+							},
+							data: {
+								userid: userid,
+								method: "delAdmin"
+							},
+							success: function(res) {
+								if (res.msg == "success") {
+									layer.msg("删除成功");
+								} else {
+									RequestError();
+								}
+								table.reload('admininfo_table', {})
+							}
+						})
+						layer.close(index);
+					});
+				} else if (obj.event == 'edit_admin') { //编辑管理员
+					layer.open({
+						type: 1,
+						title: ["修改密码", 'font-size:14px;'],
+						area: ['450px', '270px'],
+						btn: ['确定', '取消'],
+						content: $('#edit_admin_div'),
+						success: function(layero, index) {
+							layero.find("#edit_userid").val(data.userid); //赋值
+						},
+						end: function(index, layero) { //取消按钮
+							layer.close(index);
+							$("#edit_admin")[0].reset();
+							return false;
+						},
+						yes: function(index, layero) { //确定按钮
+							if (layero.find("#edit_password").val() != "") {
+								if (layero.find("#edit_password").val() == layero.find("#edit_two_password").val()) {
+									$.ajax({
+										type: 'post',
+										url: 'UserController',
+										headers: {
+											"token": localStorage.token
+										},
+										data: {
+											userid: userid, 
+											password: layero.find("#edit_password").val(), //修改后的管理员密码
+											method: "editAdminPassword",
+										},
+										success: function(res) {
+											if (res.msg == "success") {
+												layer.msg("修改成功");
+											} else {
+												RequestError();
+											}
+										}
+									})
+									layer.close(index);
+									$("#edit_admin")[0].reset();
+									table.reload('admininfo_table', {})
+								} else {
+									layer.msg("两次输入的密码不一致");
+								}
+							} else {
+								layer.msg("密码不能为空")
+							}
+
+						}
+					});
+				}
+			});
+
+		})
+	</script>
+	<script type="text/javascript">
+		//验证管理员帐号是否已存在
+		function VerifyUserid(node) {
+			var userid = node.value;
+			$.ajax({
+				type: 'post',
+				url: 'UserController',
+				headers: {
+					"token": localStorage.token
+				},
+				data: {
+					userid: userid,
+					method: "verfiyAdminUserid"
+				},
+				dataType: 'json',
+				success: function(res) {
+					if (res.msg == "success") {} else {
+						layer.msg("该帐号已存在")
+					}
+				}
+			})
+		}
+	</script>
+	<body>
+		<div class="layui-row layui-col-space20">
+			<div class="layui-col-md12">
+				<div class="layui-card" style="background-color: #FFFFFF;">
+					<div class="layui-card-header">组合搜索</div>
+					<div class="layui-card-body">
+						<div class="demoTable">
+							<form class="layui-form layui-form-pane" method="post" id="searchshops">
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">管理员帐号</label>
+									<div class="layui-input-block" style="width: 200px;">
+										<input id="userid" name="userid" placeholder="请输入管理员帐号" autocomplete="off" class="layui-input">
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">用户名</label>
+									<div class="layui-input-block" style="width: 200px;">
+										<input id="username" name="username" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">手机号</label>
+									<div class="layui-input-block" style="width: 200px;">
+										<input id="phone" name="phone" placeholder="请输入手机号" autocomplete="off" class="layui-input">
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<!-- 一定要加 type="button" 否则这个button标签会自动重载表格  -->
+									<button type="button" id="searchBtn" class="layui-btn layui-inline" data-type="reload" style="margin-left: 15px">
+										<i class="layui-icon layui-icon-search">查询</i>
+									</button>
+									<button type="reset" class="layui-btn layui-inline" style="width: 93px;">重置</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<table class="layui-hide" id="admininfo_table" lay-filter="admininfo_table"></table>
+
+		<div id="add_admin_div" style="margin: 8%; display:none;">
+			<form class="layui-form layui-form-pane" method="post" id="add_admin">
+				<div class="layui-form-item">
+					<label class="layui-form-label">管理员帐号</label>
+					<div class="layui-input-block">
+						<input type="text" id="add_userid" name="add_userid" required lay-verify="required" placeholder="请输入帐号"
+						 autocomplete="off" class="layui-input" style="width: 250px;" onblur="VerifyUserid(this)">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">密码</label>
+					<div class="layui-input-block">
+						<input type="password" id="add_password" name="add_password" required lay-verify="required" placeholder="请输入密码"
+						 autocomplete="off" class="layui-input" style="width: 250px;">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">确认密码</label>
+					<div class="layui-input-block">
+						<input type="password" id="add_two_password" name="add_two_password" required lay-verify="required" placeholder="请再次输入密码"
+						 autocomplete="off" class="layui-input" style="width: 250px;">
+					</div>
+				</div>
+			</form>
+		</div>
+
+		<div id="edit_admin_div" style="margin: 8%; display:none;">
+			<form class="layui-form layui-form-pane" method="post" id="edit_admin">
+				<div class="layui-form-item">
+					<label class="layui-form-label">新密码</label>
+					<div class="layui-input-block">
+						<input type="password" id="edit_password" name="edit_password" required lay-verify="required" placeholder="请输入密码"
+						 autocomplete="off" class="layui-input" style="width: 250px;">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">确认密码</label>
+					<div class="layui-input-block">
+						<input type="password" id="edit_two_password" name="edit_two_password" required lay-verify="required" placeholder="请再次输入密码"
+						 autocomplete="off" class="layui-input" style="width: 250px;">
+					</div>
+				</div>
+			</form>
+		</div>
+
+	</body>
+</html>

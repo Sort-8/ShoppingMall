@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <link rel="stylesheet" type="text/css" href="../res/static/css/main.css">
+  <link rel="stylesheet" type="text/css" href="../res/layui/css/layui.css">
+  <script type="text/javascript" src="../js/jquery-3.5.1.js"></script>
+  <script type="text/javascript" src="../res/layui/layui.js"></script>
+  <script type="text/javascript" src="../lay/modules/table.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+</head>
+<body>
+  <div class="site-nav-bg">
+    <div class="site-nav w1200">
+      <p class="sn-back-home">
+        <i class="layui-icon layui-icon-home"></i>
+        <a href="./commodity.html">首页</a>
+      </p>
+      <div class="sn-quick-menu">
+        <a href="usercenter.html" class="login" id="username"></a><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="header">
+    <div class="headerLayout w1200">
+      <div class="headerCon">
+        <h1 class="mallLogo">
+          <a href="#" title="母婴商城">
+            <img src="../res/static/img/logo.png">
+          </a>
+        </h1>
+        
+      </div>
+    </div>
+  </div>
+
+
+  <div class="content content-nav-base shopcart-content">
+    <div class="main-nav">
+      <div class="inner-cont0">
+        <div class="inner-cont1 w1200">
+          <div class="inner-cont2">
+            <a href="commodity.html" class="active">所有商品</a>
+            <a href="buytoday.html">今日团购</a>
+            <a href="information.html">母婴资讯</a>
+            <a href="about.html">关于我们</a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="banner-bg w1200">
+      <h3>夏季清仓</h3>
+      <p>宝宝被子、宝宝衣服3折起</p>
+    </div>
+    <div class="OrderList" style="height:auto;">
+        <div class="order-content">
+    		<ul class="item-content layui-clear" style="width:1200px; margin:auto;height:auto;">
+    			<table id="address" lay-filter="addressTool"></table>
+    			<script type="text/html" id="addressTool">
+  					<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+				</script>
+				<script type="text/html" id="toolbarDemo">
+  					<div class="layui-btn-container">
+    					<button class="layui-btn layui-btn-sm" lay-event="add">添加地址</button>
+						<button class="layui-btn layui-btn-sm" lay-event="getData">确认收货地址</button>
+  					</div>
+				</script>
+			</ul>
+   	   </div>
+   	 </div>
+   	 
+   	 <div id="addAddress_div"style="margin: 8%; display:none;" >
+	<form class="layui-form layui-form-pane" method="post" id="addAddress">
+		<div class="layui-form-item">
+			<label class="layui-form-label">姓名</label>
+			<div class="layui-input-block">
+				<input type="text" id="addname" name="add_name" required lay-verify="required" placeholder="请输入姓名" autocomplete="off" class="layui-input" style="width: 250px;">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">电话号码</label>
+			<div class="layui-input-block">
+				<input type="text" id="addphone" name="add_name" required lay-verify="required" placeholder="请输入电话号码" autocomplete="off" class="layui-input" style="width: 250px;">
+			</div>
+		</div>
+		<div class="layui-form-item">
+			<label class="layui-form-label">收货地址</label>
+			<div class="layui-input-block">
+				<input type="text" id="addaddress" name="add_name" required lay-verify="required" placeholder="请输入收货地址" autocomplete="off" class="layui-input" style="width: 250px;">
+			</div>
+		</div>
+	</form>
+	</div>
+   	 
+    <div class="cart w1200">
+      <div class="cart-table-th">
+        <div class="th th-item">
+          <div class="th-inner">
+            商品
+          </div>
+        </div>
+        <div class="th th-price">
+          <div class="th-inner">
+            单价
+          </div>
+        </div>
+        <div class="th th-amount">
+          <div class="th-inner">
+            数量
+          </div>
+        </div>
+        <div class="th th-sum">
+          <div class="th-inner">
+            小计
+          </div>
+        </div>
+      </div>
+      <div class="OrderList">
+        <div class="order-content" id="list-cont">
+          
+        </div>
+      </div>
+
+      <div class="FloatBarHolder layui-clear">
+      <div class="th th-chk">
+          <div class="select-all">
+            <div class="cart-checkbox">
+              <input hidden="hidden" class="check-all check" id="" name="select-all" type="checkbox"  value="true">
+            </div>
+            <label>&nbsp;&nbsp;已选<span class="Selected-pieces">0</span>件</label>
+          </div>
+        </div>
+        <div class="th Settlement pay">
+          <button class="layui-btn " onclick="readyPay()">支付</button>
+        </div>
+        <div class="th total">
+          <p>应付：<span class="pieces-total">0</span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script type="text/javascript">
+var that = this;
+var shopcartid
+var car;
+var Request = new Object();
+Request = GetRequest();
+var shopcartid;
+shopcartid = Request['shopcartid'];
+var that = this;
+var count = 1;
+var phone = null,name = null,address = null;
+
+layui.config({
+    base: '../res/static/js/util/' //你存放新模块的目录，注意，不是layui的模块目录
+  }).use(['mm','jquery','element','pay'],function(){
+    var mm = layui.mm,$ = layui.$,element = layui.element,pay = layui.pay;
+    init();
+    pay.init()
+});
+function GetRequest() {
+    var url = location.search; //获取url中"?"符后的字串
+    var theRequest = new Object();
+    if (url.indexOf("?") != -1) {
+        var str = url.substr(1);
+        strs = str.split("&");
+        for(var i = 0; i < strs.length; i ++) {
+            theRequest[strs[i].split("=")[0]]=decodeURI(strs[i].split("=")[1]);
+        }
+    }
+    return theRequest;
+} 
+
+  function init(){
+  	$.ajax({
+			type : "post",
+		    async : false,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+		    url : "http://localhost:8080/ShoppingMall/html/ShopCartController",
+		    data : {
+		    	"method":"getPartShopCart",
+		    	"shopcartid":that.shopcartid
+		    },
+		    headers: {
+		    	"token":localStorage.token
+		    },
+		    dataType : "json",        //返回数据形式为json
+		    success : function(result) {
+		    	console.log(result)
+		    	if(result.msg == "success"){
+		    		var contentHtml = "";
+			    	var product = result.item;
+			    	for(var i = product.length - 1 ; i >= 0 ; i--){
+			    		var tatalPrice = product[i][0].count * product[i][1].price;
+			    		contentHtml += '<ul class="item-content layui-clear">\n'+
+	        			'	<li class="th th-chk">\n'+
+	  				'		<div class="select-all">\n'+
+	    				'			<div class="cart-checkbox">\n'+
+	    				'			</div>\n'+
+	  				'		</div>\n'+
+						'	</li>\n'+
+						'	<li class="th th-item">\n'+
+	  				'		<div class="item-cont">\n'+
+	    				'			<a href="javascript:;"><img src="'+product[i][1].img+'" alt=""></a>\n'+
+	    				'		<div class="text">\n'+
+	      			'			<div class="title">'+product[i][1].title+'</div>\n'+
+	      			'				<p><span>'+product[i][0].type+'</span></p>\n'+
+	    				'			</div>\n'+
+	  				'		</div>\n'+
+						'	</li>\n'+
+						'	<li class="th th-price">\n'+
+	  				'		<span class="th-su">'+product[i][1].price+'</span>\n'+
+						'	</li>\n'+
+						'	<li class="th th-amount">\n'+
+	  				'		<div class="box-btn layui-clear">\n'+
+	    				'				<input data-type="'+product[i][0].type+'" data-shopcartid="'+product[i][0].shopcartid+'" data-id="'+product[i][0].goodsid+'" class=" datas Quantity-input" type="" name="" value="'+product[i][0].count+'" disabled="disabled">\n'+
+	  				'		</div>\n'+
+						'	</li>\n'+
+						'	<li class="th th-sum">\n'+
+	  				'		<span class="sum">'+tatalPrice+'</span>\n'+
+						'	</li>\n'+
+						'</ul>';
+			    	}
+			    	$("#list-cont").html(contentHtml);
+		    	}else{
+		    		localStorage.token = "";
+		    		window.location.href="./login.html"; 
+		    	}
+		    	if(!result.token == ""){
+	    			document.getElementById('username').innerHTML = "您好，" + localStorage.userid
+	    		}else{
+	    			document.getElementById('username').innerHTML = '<a href="./login.html">登录</a>'
+	    			localStorage.token = "";
+	    		}
+		    	inittable();
+		    },
+		    error : function(errorMsg) {
+		        
+		    }
+		})
+  }
+  function inittable(){
+	  layui.use('table',function(){
+			var table = layui.table;
+			var tableObj = table.render({
+				elem:'#address',
+				url:'http://localhost:8080/ShoppingMall/html/AddressController',
+				toolbar: '#toolbarDemo', //开启头部工具栏，并为其绑定左侧模板
+				where:{
+					'method':"showAllAddress"
+				},
+				headers:{
+					"token":localStorage.token
+				},
+				cols:[[  //标题
+					{type:'radio'},
+					{field:'name',title:'真实姓名',width:150 , edit : 'text'},
+					{field:'phone',title:'电话号码',Width:30 , edit : 'text'},
+					{field:'address',title:'地址',Width:150 , edit : 'text'},
+					{fixed: 'right', title:'操作', toolbar: '#addressTool',width:200}
+				]],
+			    parseData: function(res){ //将原始数据解析成 table 组件所规定的数据
+			      return {
+			        "code": res.code, //解析接口状态
+			        "msg": res.msg, //解析提示文本
+			        "data": res.item, //解析数据列表
+			      };
+			    }
+			})
+			
+			table.on('tool(addressTool)', function(obj){ //注：tool 是工具条事件名，test 是 table 原始容器的属性 lay-filter="对应的值"
+				  var data = JSON.stringify(obj.data); //获得当前行数据
+				  var layEvent = obj.event; //获得 lay-event 对应的值（也可以是表头的 event 参数对应的值）
+				  var tr = obj.tr; //获得当前行 tr 的 DOM 对象（如果有的话）
+				  if(layEvent === 'del'){ //删除
+				    layer.confirm('确认删除？', function(index){
+				      obj.del(); //删除对应行（tr）的DOM结构，并更新缓存
+				      del(obj.data.addressid)
+				      deleteInfo(obj.data.id);
+				      layer.close(index);
+				      //向服务端发送删除指令
+				    });
+				  }
+				});
+			table.on('edit(addressTool)', function(obj){
+			    var value = obj.value //得到修改后的值
+			    ,data = obj.data //得到所在行所有键值
+			    ,field = obj.field; //得到字段
+			    $.ajax({
+		  			type : "post",
+		  		    async : false,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+		  		    url : "http://localhost:8080/ShoppingMall/html/AddressController",
+		  		    data : {
+		  		    	"addressid":data.addressid,
+		  		    	"name":data.name,
+		  		    	"phone":data.phone,
+		  		    	"address":data.address,
+		  		    	"method":"editAddress"
+		  		    },
+		  		    headers: {
+		  		    	"token":localStorage.token
+		  		    },
+		  		    dataType : "json",        //返回数据形式为json
+		  		    success : function(result) {
+		  		    	if(result.msg == "success"){
+		  		    		layer.msg('修改成功')
+		  		    	}else{
+		  		    		localStorage.token = "";
+				    		localStorage.userid = null;
+				    		window.location.href="./login.html"; 
+		  		    	}
+		  		    },
+		  		    error : function(errorMsg) {
+		  		        
+		  		    }
+		  		})
+			  });
+			
+			//头工具栏事件
+			table.on('toolbar(addressTool)', function(obj){
+				var checkStatus = table.checkStatus(obj.config.id);
+				switch(obj.event){
+					case 'add':
+						layer.open({
+							type:1,
+							title:["添加收货地址",'font-size:14px;'],
+							area:['450px', '330px'], //宽高
+							btn: ['确定添加', '取消添加'],
+							content:$('#addAddress_div'),
+							yes:function(index, layero){              //确定按钮
+								var name = document.getElementById('addname').value;
+								var phone = document.getElementById('addphone').value;
+								var address = document.getElementById('addaddress').value;
+								if(name == "" || phone == "" || address ==""){
+									layer.msg('必填项不能为空！')
+								}else{
+									add(name , phone , address)
+								}
+								layer.close(index);
+							},
+							end:function(index, layero){              
+								layer.close(index);
+								$("#addAddress")[0].reset();
+								return false;
+							},
+						})
+						break;
+					case 'getData':
+				        var data = checkStatus.data;  //获取选中行数据
+				        if(data != ""){
+				        	that.name = data.name;
+					        that.address = data.address;
+					        that.phone = data.phone;
+					        layer.msg('已确认收货地址')
+				        }else{
+				        	layer.msg('请选择收货地址')
+				        }
+				      	break;
+					
+				}
+			});
+		});
+  }
+  
+  function add(name , phone , address){
+	  $.ajax({
+			type : "post",
+		    async : false,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+		    url : "http://localhost:8080/ShoppingMall/html/AddressController",
+		    data : {
+		    	"name":name,
+		    	"phone":phone,
+		    	"address":address,
+		    	"method":"addAddress"
+		    },
+		    headers: {
+		    	"token":localStorage.token
+		    },
+		    dataType : "json",        //返回数据形式为json
+		    success : function(result) {
+		    	if(result.msg == "success"){
+		    		layer.msg('添加成功')
+		    	}else{
+		    		localStorage.token = "";
+		    		localStorage.userid = null;
+		    		window.location.href="./login.html"; 
+		    	}
+		    },
+		    error : function(errorMsg) {
+		        
+		    }
+		})
+  }
+  
+  function readyPay(){
+	  console.log(that.name)
+	  if(that.name != "null"){
+		  //layer.msg('请确认收货地址')
+	  }else{
+		  //layer.msg('可以支付了')
+		  //layer.msg('发送ajax请求');
+		  alert(212)
+		  var out_trade_no = "213847854"; //订单号(必填)
+		  var total_amount = "146";//金额(必填)
+		  var subject = "124876";//订单名称(必填)
+		  var body = "12324";//商品描述，(选填)
+		  window.parent.location.href = "http://localhost:8080/ShoppingMall/html/TestController"
+		  + "?method=Alipay&out_trade_no="+out_trade_no+"&total_amount="+total_amount
+	  	  + "&subject="+subject+"&body="+body;
+	  }
+  }
+  
+  function del(addressid){
+	  $.ajax({
+			type : "post",
+		    async : false,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+		    url : "http://localhost:8080/ShoppingMall/html/AddressController",
+		    data : {
+		    	"addressid":addressid,
+		    	"method":"delAddress"
+		    },
+		    headers: {
+		    	"token":localStorage.token
+		    },
+		    dataType : "json",        //返回数据形式为json
+		    success : function(result) {
+		    	if(result.msg == "success"){
+		    		layer.msg('删除成功')
+		    	}else{
+		    		localStorage.token = "";
+		    		localStorage.userid = null;
+		    		window.location.href="./login.html"; 
+		    	}
+		    },
+		    error : function(errorMsg) {
+		        
+		    }
+		})
+  }
+  
+</script>
+</body>
+</html>

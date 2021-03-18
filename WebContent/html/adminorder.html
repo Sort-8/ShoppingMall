@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>商品管理</title>
+	</head>
+	<link rel="stylesheet" type="text/css" href="../res/layui/css/layui.css" />
+	<script type="text/javascript" src="../res/js/echarts.min.js"></script>
+	<script type="text/javascript" src="../res/js/jquery-3.5.1.js"></script>
+	<script type="text/javascript" src="../res/layui/layui.js"></script>
+
+	<script type="text/javascript">
+		//跳转到登录界面
+		function jumpLogin() {
+			window.parent.location.href = "adminlogin.html";
+			window.location.close();
+		}
+	</script>
+
+	<script type="text/javascript">
+		//判断是否已登录，防止跨域请求
+		$(function() {
+			if (localStorage.userid != undefined) {
+				var userid = localStorage.userid;
+			} else {
+				alert("请登录");
+				jumpLogin();
+			}
+		});
+	</script>
+
+	<script type="text/javascript">
+		//会话过期函数
+		function RequestError() {
+			localStorage.clear();
+			alert("会话已过期，请登录");
+			jumpLogin();
+		}
+	</script>
+
+	<style type="text/css">
+		/*设置数据表表头*/
+		.layui-table th {
+			text-align: center;
+			/*表头居中*/
+		}
+
+		.layui-table td {
+			text-align: center;
+			/*表格数据居中*/
+		}
+	</style>
+
+	<script type="text/html" id="barDemo">
+		<a class="layui-btn layui-btn-xs" lay-event="edit_shops">发货</a>
+	</script>
+
+	<script type="text/javascript">
+		//渲染订单列表
+		layui.use('table', function() {
+			var table = layui.table;
+			var tableIns = table.render({
+				elem: '#adminorder_table',
+				url: 'OrdersController',
+				method: 'post',
+				toolbar: '#toolbarDemo', //开启头部工具栏
+				title: 'adminorder_table',
+				headers: {
+					"token": localStorage.token
+				},
+				cols: [
+					[ //表格字段参数
+						{
+							field: 'ordersid',
+							title: '订单号',
+							width: 250,
+							fixed: 'left',
+						}, {
+							field: 'username',
+							title: '用户名',
+							width: 180
+						}, {
+							field: 'price',
+							title: '总价',
+							width: 120,
+							sort: true
+						}, {
+							field: 'createtime',
+							title: '创建时间',
+							width: 180,
+							sort: true
+						}, {
+							field: 'status',
+							title: '状态',
+							width: 150
+						}, {
+							fixed: 'right',
+							title: '操作',
+							toolbar: '#barDemo',
+							width: 160
+						}
+					]
+				],
+				page: true,
+				where: {
+					method: "getAllOrders",
+				},
+				parseData: function(res) { //将原始解析成layui支持的数据
+					if (res.msg != "success") {
+						RequestError();
+					}
+					if (this.page.curr) {
+						result = res.item.slice(this.limit * (this.page.curr - 1), this.limit * this.page.curr);
+					} else {
+						result = res.item.slice(0, this.limit);
+					}
+					return {
+						"code": res.code, //解析接口状态
+						"msg": res.msg, //解析提示文本
+						"data": result, //解析数据列表
+						"count": res.item.length
+					};
+				},
+
+			});
+
+			//组合搜索+模糊搜索
+			var $ = layui.$,
+				active = {
+					reload: function() {
+						var shopsid = $('#shopsid');
+						var username = $('#username');
+						var status = $('#selected_status');
+						tableIns.reload({
+							headers: {
+								"token": localStorage.token
+							},
+							page: {
+								curr: 1 //重新从第 1 页开始
+							},
+							where: {
+								ordersid: shopsid.val(),
+								username: username.val(),
+								status: status.val(),
+								method: "searchOrders"
+							}
+						}, 'data');
+					}
+				};
+
+			/*绑定搜索点击事件*/
+			$('#searchBtn').on('click', function() {
+				var type = $(this).data('type');
+				active[type] ? active[type].call(this) : '';
+			});
+
+			//监听行工具
+			table.on('tool(adminorder_table)', function(obj) {
+				var data = obj.data; //拿到选中的一行数据
+				console.log(data)
+				var status = data.status;
+				console.log(status)
+				var ordersid = data.ordersid
+				switch (obj.event) {
+					case 'edit_shops': //修改订单状态
+						if (status == "待发货") {
+							layer.confirm('确定发货吗？', {
+								title: '发货'
+							}, function(index) {
+								$.ajax({
+									type: 'post',
+									url: 'OrdersController',
+									headers: {
+										"token": localStorage.token
+									},
+									data: {
+										ordersid: ordersid,
+										status: "待收货",
+										method: "editOrders"
+									},
+									success: function(res) {
+										if (res.msg == "success") {
+											layer.msg("发货成功");
+										} else {
+											RequestError();
+										}
+										layer.close(index);
+									}
+								})
+								tableIns.reload();
+								layer.close(layer.index);
+							});
+						} else if (status == "待付款") {
+							layer.msg("该订单还未付款，不能发货")
+						} else if (status == "待收货") {
+							layer.msg("该订单已发货，无需重复发货")
+						} else {
+							layer.msg("该订单不能发货")
+						}
+				}
+			})
+		})
+	</script>
+
+	<body>
+		<div class="layui-row layui-col-space20">
+			<div class="layui-col-md12">
+				<div class="layui-card" style="background-color: #FFFFFF;">
+					<div class="layui-card-header">组合搜索</div>
+					<div class="layui-card-body">
+						<div class="demoTable">
+							<form class="layui-form layui-form-pane" method="post" id="searchshops">
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">订单号</label>
+									<div class="layui-input-block" style="width: 200px;">
+										<input id="shopsid" name="shopsid" placeholder="请输入订单号" autocomplete="off" class="layui-input">
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">用户名</label>
+									<div class="layui-input-block" style="width: 200px;">
+										<input id="username" name="username" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">订单状态</label>
+									<div class="layui-input-block" style="width: 150px;">
+										<select id="selected_status">
+											<option value="">请选择订单状态</option>
+											<option value="待付款">待付款</option>
+											<option value="待发货">待发货</option>
+											<option value="待收货">待收货</option>
+											<option value="待换货">待换货</option>
+											<option value="待退货">待退货</option>
+											<option value="待评价">待评价</option>
+										</select>
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<!-- 一定要加 type="button" 否则这个button标签会自动重载表格  -->
+									<button type="button" id="searchBtn" class="layui-btn layui-inline" data-type="reload" style="margin-left: 15px">
+										<i class="layui-icon layui-icon-search">查询</i>
+									</button>
+									<button type="reset" class="layui-btn layui-inline" style="width: 93px;">重置</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<table class="layui-hide" id="adminorder_table" lay-filter="adminorder_table"></table>
+
+	</body>
+</html>

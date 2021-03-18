@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>后台登录</title>
+		<script type="text/javascript" src="../res/layui/layui.js"></script>
+		<script type="text/javascript" src="../res/js/jquery-3.5.1.js"></script>
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+		<link rel="stylesheet" type="text/css" href="../res/static/css/login.css">
+		<link rel="stylesheet" type="text/css" href="../res/layui/css/layui.css">
+	</head> 
+	<script type="text/javascript">
+		function focusInput(node) {
+			var str = node.css;
+			$('#msg').css('display', 'none');
+		}
+	</script>
+	<script type="text/javascript">
+		function Verify() {
+			if ($("#userid").val() == "") {
+				document.getElementById('msg').innerText = "帐号不能为空"
+				$('#msg').css('display', 'inline');
+				return false;
+			}
+			if ($("#password").val() == "") {
+				document.getElementById('msg').innerText = "密码不能为空"
+				$('#msg').css('display', 'inline');
+				return false;
+			}
+			return true;
+		}
+	</script>
+	<script type="text/javascript">
+		function login() {
+			if (Verify() == false) {
+				return;
+			}
+			var userid = $('#userid').val();
+			var password = $('#password').val();
+			localStorage.clear();
+			var token = localStorage.token;
+			$.ajax({
+				type: 'post',
+				url: 'http://localhost:8080/ShoppingMall/html/UserController',
+				data: {
+					'method': 'login',
+					'userid': userid,
+					'password': password,
+					'url': 'admin'
+				},
+				headers: {
+					"token": token
+				},
+				dataType: "json",
+				success: function(res) {
+					if (res.msg == "success") {
+						localStorage.setItem("token", res.item[0]);
+						localStorage.setItem("power", res.item[1]);
+						localStorage.setItem("userid", userid);
+						window.location.href = "adminindex.html";
+					} else {
+						document.getElementById('msg').innerText = "帐号或密码错误，请重试"
+						$('#msg').css('display', 'inline');
+					}
+				}
+			})
+		}
+	</script>
+	<body>
+		<div class="layadmin-user-login-main">
+			<div class="layadmin-user-login-box layadmin-user-login-header">
+				<h2>商城后台管理</h2>
+			</div>
+			<div class="layadmin-user-login-box layadmin-user-login-body layui-form">
+				<div class="layui-form-item">
+					<label class="layadmin-user-login-icon layui-icon layui-icon-username" for="LAY-user-login-username"></label>
+					<input type="text" name="userid" id="userid" lay-verify="required" placeholder="用户名" class="layui-input" onfocus="focusInput(this)">
+				</div>
+				<div class="layui-form-item">
+					<label class="layadmin-user-login-icon layui-icon layui-icon-password" for="LAY-user-login-password"></label>
+					<input type="password" name="password" id="password" lay-verify="required" placeholder="密码" class="layui-input"
+					 onfocus="focusInput(this)">
+				</div>
+
+				<div class="layui-form-item">
+					<label class="layadmin-user-login-icon layui-icon layui-icon-password" for="LAY-user-login-password"></label>
+					<input type="text" name="method" id="method" value="login" style="display: none;">
+				</div>
+				<div class="layui-form-item">
+					<button class="layui-btn layui-btn-fluid" lay-submit lay-filter="LAY-user-login-submit" id="login" onclick="login()">登陆</button>
+				</div>
+			</div>
+			<center>
+				<div id="msg" style="color: red;display: none;"></div>
+			</center>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>我的订单</title>
+		<link rel="stylesheet" type="text/css" href="../res/layui/css/layui.css">
+		<script src="../js/jquery-3.5.1.js"></script>
+		<script type="text/javascript" src="../res/layui/layui.js"></script>
+	</head>
+	<script type="text/html" id="barDemo">
+		<a id="choose-event" class="layui-btn layui-btn-xs" lay-event="pay"></a>
+		<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">取消</a>
+	</script>
+	<script type="text/javascript">
+		//渲染订单列表
+		layui.use('table', function() {
+			var table = layui.table;
+			var tableIns = table.render({
+				elem: '#orders_table',
+				url: 'http://localhost:8080/ShoppingMall/html/OrdersController',
+				method: 'post',
+				title: 'orders_table',
+				headers: {
+					"token": localStorage.token
+				},
+				cols: [
+					[ //表格字段参数
+						{
+							field: 'ordersid',
+							title: '订单号',
+							width: 250,
+							fixed: 'left',
+						}, {
+							field: 'details',
+							title: '详请',
+							templet: '#goodsdetails',
+							height: 200,
+							width: 300,
+						}, {
+							field: 'price',
+							title: '金额',
+							width: 90,
+							sort: true
+						}, {
+							field: 'createtime',
+							title: '创建时间',
+							width: 160,
+							sort: true
+						}, {
+							field: 'status',
+							title: '状态',
+							width: 80
+						},  {
+							field: 'address',
+							title: '收货信息',
+							width: 150
+						},{
+							fixed: 'right',
+							title: '操作',
+							toolbar: '#barDemo',
+							width: 160
+						}
+					]
+				],
+				page: true,
+				where: {
+					method: "searchOrderByUserid",
+				},
+				parseData: function(res) { //将原始解析成layui支持的数据
+					console.log(res)
+					var btn = document.getElementById('choose-event')
+					console.log(btn)
+					if(res.item[0].status == "待付款"){
+						btn.innerHTML = "付款";
+						btn.setAttribute('lay-event','pay')
+					}else if(res.item[0].status == "待收货"){
+						btn.innerHTML = "确认收货";
+						btn.setAttribute('lay-event','get')
+					}else if(res.item[0].status == "已收货"){
+						btn.innerHTML = "评论";
+						btn.setAttribute('lay-event','comment')
+					}
+					if (this.page.curr) {
+						result = res.item.slice(this.limit * (this.page.curr - 1), this.limit * this.page.curr);
+					} else {
+						result = res.item.slice(0, this.limit);
+					}
+					return {
+						"code": res.code, //解析接口状态
+						"msg": res.msg, //解析提示文本
+						"data": result, //解析数据列表
+						"count": res.item.length
+					};
+				},
+				// //在表格加载完毕后执行的方法
+				// done: function(res, curr, count) {
+				// 	layer.alert("本次搜索到 共" + count + "条数据", {
+				// 		icon: 0
+				// 	});
+				// }
+
+			});
+
+			//组合搜索+模糊搜索
+			var $ = layui.$,
+				active = {
+					reload: function() {
+						var ordersid = $('#ordersid');
+						var username = $('#username');
+						var status = $('#selected_status');
+						tableIns.reload({
+							headers: {
+								"token": localStorage.token
+							},
+							page: {
+								curr: 1 //重新从第 1 页开始
+							},
+							where: {
+								ordersid: ordersid.val(),
+								username: username.val(),
+								status: status.val(),
+								method: "searchOrders"
+							}
+						}, 'data');
+					}
+				};
+
+			/*绑定搜索点击事件*/
+			$('#searchBtn').on('click', function() {
+				var type = $(this).data('type');
+				active[type] ? active[type].call(this) : '';
+			});
+
+			//监听行工具
+			table.on('tool(orders_table)', function(obj) {
+				var data = obj.data; //拿到选中的一行数据
+				console.log(data)
+				var status = data.status;
+				console.log(status)
+				var ordersid = data.ordersid
+				console.log(ordersid)
+				switch (obj.event) {
+					case 'pay': //订单付款
+						if (status == "待付款") {
+							//订单支付界面
+						}
+						break;
+					case 'del': //取消订单
+						if(status == "已取消"){
+							layer.msg("已取消，无需重复取消")
+						} else{
+							layer.confirm('确定取消吗？',{
+								title:'取消'
+							}, function(index){
+								$.ajax({  //取消订单
+									type:'post',
+									url:'http://localhost:8080/ShoppingMall/html/json/orders.json',
+									headers: {
+										"token": localStorage.token
+									},
+									data: {
+										ordersid: ordersid,
+										status: "已取消",
+										method: "editOrders"
+									},
+									dataType: "json",
+									success: function(res) {
+										if(res.msg=="success"){
+											layer.msg("取消成功")
+											tableIns.reload();
+											layer.close(index);
+										}
+									}
+								})
+							})
+						}
+						break;
+						case 'get': //收货
+						if (status == "待收货") {
+							layer.confirm('确定收货吗？',{
+								title:'收货'
+							}, function(index){
+								changestatus(ordersid , "已收货");
+								btn.innerHTML = "评价";
+								document.getElementById('choose-event').setAttribute('lay-event','comment')
+							})
+						}
+						break;
+						case 'get': //评论
+							if (status == "已收货") {
+								layer.confirm('确定收货吗？',{
+									title:'收货'
+								}, function(index){
+									changestatus(ordersid , "已评价");
+									btn.innerHTML = "";
+									document.getElementById('choose-event').setAttribute('lay-event','comment')
+								})
+							}
+							break;
+				}
+			})
+		})
+	function changestatus(status){
+			$.ajax({  //修改状态
+				type:'post',
+				url:'http://localhost:8080/ShoppingMall/html/OrdersController',
+				headers: {
+					"token": localStorage.token
+				},
+				data: {
+					ordersid: ordersid,
+					status: "已取消",
+					method: "editOrders"
+				},
+				dataType: "json",
+				success: function(res) {
+					if(res.msg=="success"){
+						layer.msg("取消成功")
+						tableIns.reload();
+						layer.close(index);
+					}
+				}
+			})
+		}
+	</script>
+	<body>
+		<div class="layui-row layui-col-space20">
+			<div class="layui-col-md12">
+				<div class="layui-card" style="background-color: #FFFFFF;">
+					<div class="layui-card-header">组合搜索</div>
+					<div class="layui-card-body">
+						<div class="demoTable">
+							<form class="layui-form layui-form-pane" method="post" id="searchshops">
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">订单号</label>
+									<div class="layui-input-block" style="width: 200px;">
+										<input id="ordersid" name="ordersid" placeholder="请输入订单号" autocomplete="off" class="layui-input">
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">商品名</label>
+									<div class="layui-input-block" style="width: 200px;">
+										<input id="shopstitle" name="shopstitle" placeholder="请输入商品名" autocomplete="off" class="layui-input">
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">商品类别</label>
+									<div class="layui-input-block" style="width: 200px;">
+										<input id="shopstype" name="shopstype" placeholder="请输入商品类别" autocomplete="off" class="layui-input">
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<!-- 一定要加 type="button" 否则这个button标签会自动重载表格  -->
+									<button type="button" id="searchBtn" class="layui-btn layui-inline" data-type="reload" style="margin-left: 15px">
+										<i class="layui-icon layui-icon-search">查询</i>
+									</button>
+									<button type="reset" class="layui-btn layui-inline" style="width: 93px;">重置</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<table class="layui-hide" id="orders_table" lay-filter="orders_table"></table>
+	</body>
+</html>

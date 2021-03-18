@@ -1,0 +1,53 @@
+{
+	"code": "0",
+	"msg": "success",
+	"item": [{
+		"ordersid": "5189124325",
+		"details": [{
+			"img":"https://mall-1305004688.cos.ap-nanjing.myqcloud.com/more3.jpg",
+			"goodsname":"夏天长袜",
+			"goodsid":"124234356",
+			"count":5
+		},{
+			"img":"https://mall-1305004688.cos.ap-nanjing.myqcloud.com/more3.jpg",
+			"goodsname":"夏天长袜",
+			"count":5
+		},{
+			"img":"https://mall-1305004688.cos.ap-nanjing.myqcloud.com/more3.jpg",
+			"goodsname":"夏天长袜",
+			"count":8
+		}],
+		"price": "312.54",
+		"count":"12",
+		"createtime": "2021-03-01 18:06:42",
+		"activetime":"2021-03-01 18:06:42",
+		"status": "待发货",
+		"addressid":"12312124"
+	},{
+		"ordersid": "5189124325",
+		"details": [{
+			"img":"https://mall-1305004688.cos.ap-nanjing.myqcloud.com/more3.jpg",
+			"goodsname":"夏天长袜",
+			"count":2
+		}],
+		"price": "312.54",
+		"count":"12",
+		"createtime": "2021-03-01 18:06:42",
+		"activetime":"2021-03-01 18:06:42",
+		"status": "待发货",
+		"addressid":"12312124"
+	},{
+		"ordersid": "5189124325",
+		"details": [{
+			"img":"https://mall-1305004688.cos.ap-nanjing.myqcloud.com/more3.jpg",
+			"goodsname":"夏天长袜",
+			"count":2
+		}],
+		"price": "312.54",
+		"count":"12",
+		"createtime": "2021-03-01 18:06:42",
+		"activetime":"2021-03-01 18:06:42",
+		"status": "待发货",
+		"addressid":"12312124"
+	}]
+}

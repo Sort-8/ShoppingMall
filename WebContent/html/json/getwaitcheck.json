@@ -1,0 +1,12 @@
+{
+	"code":"0",
+	"msg":"success",
+	"item": {
+		"comment":"1234",
+		"shops":"1343",
+		"user":"7532",
+		"deliver":"123",
+		"todaysales":"1248.32",
+		"rate":"20%"
+	}
+}

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>控制台</title>
+		<script type="text/javascript" src="../res/js/jquery-3.5.1.js"></script>
+		<script type="text/javascript" src="../res/layui/layui.js"></script>
+		<link rel="stylesheet" type="text/css" href="../res/layui/css/layui.css" />
+
+		<script type="text/javascript">
+			//跳转到登录界面
+			function jumpLogin() {
+				window.parent.location.href = "adminlogin.html";
+				window.location.close();
+			}
+		</script>
+
+		<script type="text/javascript">
+			//判断是否已登录，防止跨域请求
+			$(function() {
+				if (localStorage.userid != undefined) {
+					var userid = localStorage.userid;
+				} else {
+					alert("请登录");
+					jumpLogin();
+				}
+			});
+		</script>
+
+		<script type="text/javascript">
+			//会话过期函数
+			function RequestError() {
+				localStorage.clear();
+				alert("会话已过期，请登录");
+				jumpLogin();
+			}
+		</script>
+
+	</head>
+	<script type="text/javascript">
+		//调用父页面的函数
+		function show(title) {
+			$(window.parent.changeshow(title))
+		}
+	</script>
+
+	<script type="text/javascript">
+		//修改今日成交额以及待办事项的标签的值
+		function InsertValue(id, value) {
+			document.getElementById(id).innerText = value;
+		}
+	</script>
+
+	<script type="text/javascript">
+		//更新今日成交额以及待办事项
+		$(function() {
+			$.ajax({
+				type: 'post',
+				url: "http://localhost:8080/ShoppingMall/html/json/daysales.json",
+				data: {
+					"method": "getTodaySales",
+				},
+				headers: {
+					"token": localStorage.token
+				},
+				dataType: "json",
+				success: function(res) {
+					// alert(res.item.rate)
+					if (res.msg == "success") {
+						InsertValue("waitComment", res.item.waitComment);
+						InsertValue("waitUser", res.item.waitUser);
+						InsertValue("waitDeliver", res.item.waitDeliver);
+						InsertValue("todaysales", res.item.todaysales);
+						InsertValue("rate", res.item.rate);
+					} else {
+						RequestError();
+					}
+				}
+			})
+
+		})
+	</script>
+	<body style="background-color: #F2F2F2;">
+		<div class="layui-row layui-col-space20">
+			<div class="layui-col-md9">
+				<div class="layui-card" style="background-color: #FFFFFF;">
+					<div class="layui-card-header" style="font-size: 18px;">销量概览</div>
+					<div class="layui-card-body">
+						<div id="time_sales" style="width: 800px;height:400px;"></div>
+					</div>
+				</div>
+			</div>
+			<div class="layui-col-md3">
+				<div class="layui-card" style="background-color: #FFFFFF;">
+					<div class="layui-card-header" style="font-size: 18px;">待办事项</div>
+					<div class="layui-card-body">
+						<div class="layui-row layui-col-space30">
+							<div class="layui-btn-container">
+								<button type="button" class="layui-btn layui-btn-primary layui-btn-lg" style="height: 100px;background-color: #F2F2F2;"
+								 onclick="show('admincomment')">
+									<span style="font-size: 16px;">待审评论</span>
+									<br>
+									<span id="waitComment" style="color: #009688; font-size: 26px;">0</span>
+								</button>
+							</div>
+						</div>
+						<div class="layui-row layui-col-space30">
+							<div class="layui-btn-container">
+								<button type="button" class="layui-btn layui-btn-primary layui-btn-lg" style="height: 100px;background-color: #F2F2F2;"
+								 onclick="show('adminuser')">
+									<span style="font-size: 16px;">待审用户</span>
+									<br>
+									<span id="waitUser" style="color: #009688; font-size: 26px;">0</span>
+								</button>
+								<button type="button" class="layui-btn layui-btn-primary layui-btn-lg" style="height: 100px; width: 116px; background-color: #F2F2F2;margin-left: 20px;"
+								 onclick="show('adminorder')">
+									<span style="font-size: 16px;">待发货</span>
+									<br>
+									<span id="waitDeliver" style="color: #009688; font-size: 26px;">0</span>
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="layui-row layui-col-space30">
+				<div class="layui-col-md9">
+					<div class="layui-card" style="background-color: #FFFFFF;">
+						<div class="layui-card-header"></div>
+						<div class="layui-card-body">
+							<div id="type_sales" style="width: 800px;height:400px;"></div>
+						</div>
+					</div>
+				</div>
+				<div class="layui-col-md3">
+					<div class="layui-card" style="background-color: #FFFFFF;">
+						<div class="layui-card-header" style="font-size: 18px;">今日成交额</div>
+						<div class="layui-card-body">
+							<span id="todaysales" style="font-size: 26px; color: #009688;">0</span>
+							<span style="font-size: 16px; color: #999999;">日同比<i id="rate">0%</i></span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		</div>
+
+		<script type="text/javascript" src="../res/js/echarts.min.js"></script>
+		<script type="text/javascript">
+			// 指定类目销量图表的配置项和数据
+			var option_type = {
+				title: {
+					text: '',
+					left: ''
+				},
+				tooltip: {},
+				legend: {
+					data: ["销量"]
+				},
+				xAxis: {
+					data: []
+				},
+				yAxis: {},
+				series: [{
+					name: '',
+					type: '',
+					data: []
+				}]
+			};
+			$.ajax({
+				type: 'post',
+				url: "http://localhost:8080/ShoppingMall/html/json/typesales.json",
+				data: {
+					"method": "getTypeSales",
+				},
+				headers: {
+					"token": localStorage.token
+				},
+				dataType: "json",
+				success: function(res) {
+					if (res.msg == "success") {
+						option_type.title.text = res.item.title.text;
+						option_type.title.left = res.item.title.left;
+						option_type.legend.data = res.item.legend;
+						option_type.series[0].type = res.item.type;
+						option_type.series[0].name = res.item.name;
+						option_type.xAxis.data = res.item.types_data;
+						option_type.series[0].data = res.item.sales_data; //这里的数据在option_type.series[0].data,而不是option.series.data
+						var myChart_type = echarts.init(document.getElementById('type_sales'));
+						myChart_type.setOption(option_type, true); // 使用刚指定的配置项和数据显示图表。
+					} else {
+						RequestError();
+					}
+
+				}
+			})
+		</script>
+		<script type="text/javascript">
+			// 指定时段销量图表的配置项和数据
+			var option_time = {
+				title: {
+					text: '',
+					left: ''
+				},
+				tooltip: {
+					trigger: 'axis'
+				},
+				legend: {
+					data: []
+				},
+				grid: {
+					left: '3%',
+					right: '4%',
+					bottom: '3%',
+					containLabel: true
+				},
+				toolbox: {
+					feature: {
+						saveAsImage: {}
+					}
+				},
+				xAxis: {
+					type: 'category',
+					boundaryGap: false,
+					data: []
+				},
+				yAxis: {
+					type: 'value'
+				},
+				series: [{
+					name: [],
+					type: '',
+					stack: '总量',
+					data: []
+				}]
+			};
+
+			$.ajax({
+				type: 'post',
+				url: "http://localhost:8080/ShoppingMall/html/json/timesales.json",
+				data: {
+					"method": "getTimeSales",
+				},
+				headers: {
+					"token": localStorage.token
+				},
+				dataType: "json",
+				success: function(res) {
+					if (res.msg == "success") {
+						option_time.series[0].type = res.item.type;
+						option_time.title.text = res.item.title.text;
+						option_time.title.left = res.item.title.left;
+						option_time.legend.data = res.legend;
+						option_time.series[0].name = res.item.name;
+						option_time.xAxis.data = res.item.time_data;
+						option_time.series[0].data = res.item.sales_data; //这里的数据在option.series[0].data,而不是option.series.data
+						var myChart_time = echarts.init(document.getElementById('time_sales'));
+						myChart_time.setOption(option_time, true);
+					} else {
+						RequestError();
+					}
+
+				}
+			})
+		</script>
+	</body>
+</html>

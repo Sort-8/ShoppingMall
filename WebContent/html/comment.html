@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<link rel="stylesheet" type="text/css" href="../res/layui/css/layui.css">
+<script type="text/javascript" src="../res/layui/layui.js"></script>
+<script type="text/javascript" src="../js/jquery-3.5.1.js"></script>
+</head>
+<body>
+	<div id="comments">
+		<!-- 评论显示 -->
+	</div>
+	<script type="text/javascript">
+	var Request = new Object();
+	Request = GetRequest();
+	var goodsid;
+	var that = this;
+	goodsid = Request['goodsid'];
+	
+	$.ajax({
+		type : "post",
+	    async : false,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+	    url : "http://localhost:8080/ShoppingMall/html/CommentController",
+	    data : {
+	    	"goodsid":that.goodsid,
+	    	"method":"showGoodsComment"
+	    },
+	    headers: {
+	    	"token":localStorage.token
+	    },
+	    dataType : "json",        //返回数据形式为json
+	    success : function(result) {
+	    	var comment = result.item;
+	    	var contentHtml = "";
+	    	console.log(result.item)
+	    	if(!result.item.length == 0){
+	    		for(var i = 0 ; i < comment.length ; i++){
+		    		contentHtml += '<pre class="layui-code" style="height:180px; overflow : auto ; margin : 20px; ">\n'+
+		    						'	<h3>'+ comment[i].username +'</h3>\n'+
+		    						'	<p style="font-size:10px;">'+ comment[i].comment +'</p>\n'+
+		    						'	<p style="font-size:2px;float:right;">'+ comment[i].createtime +'</p>\n'+
+		    						'</pre>';
+		    		$("#comments").html(contentHtml);
+		    	}
+	    	}else{
+	    		contentHtml += '<h2 style="margin:10px;text-align:center">暂无评论，快来评论吧！</h4>'
+				$("#comments").html(contentHtml);
+	    	}
+
+	    },
+	    error : function(errorMsg) {
+	        
+	    }
+	})
+	
+	function GetRequest() {
+	    var url = location.search; //获取url中"?"符后的字串
+	    var theRequest = new Object();
+	    if (url.indexOf("?") != -1) {
+	        var str = url.substr(1);
+	        strs = str.split("&");
+	        for(var i = 0; i < strs.length; i ++) {
+	            theRequest[strs[i].split("=")[0]]=decodeURI(strs[i].split("=")[1]);
+	        }
+	    }
+	    return theRequest;
+	} 
+	</script>
+</body>
+</html>

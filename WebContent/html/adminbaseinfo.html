@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>基本资料</title>
+		<link rel="stylesheet" type="text/css" href="../res/layui/css/layui.css" />
+		<script type="text/javascript" src="../res/js/echarts.min.js"></script>
+		<script type="text/javascript" src="../res/js/jquery-3.5.1.js"></script>
+		<script type="text/javascript" src="../res/layui/layui.js"></script>
+
+		<script type="text/javascript">
+			//跳转到登录界面
+			function jumpLogin() {
+				window.parent.location.href = "adminlogin.html";
+				window.location.close();
+			}
+		</script>
+
+		<script type="text/javascript">
+			//判断是否已登录，防止跨域请求
+			$(function() { 
+				if (localStorage.userid != undefined) {
+					var userid = localStorage.userid;
+				} else {
+					alert("请登录");
+					jumpLogin();
+				}
+			});
+		</script>
+
+		<script type="text/javascript">
+			//会话过期函数
+			function RequestError() {
+				localStorage.clear();
+				alert("会话已过期，请登录");
+				jumpLogin();
+			}
+		</script>
+
+		<style type="text/css">
+			/*设置数据表表头*/
+			.layui-table th {
+				text-align: center;
+				/*表头居中*/
+			}
+
+			.layui-table td {
+				text-align: center;
+				/*表格数据居中*/
+			}
+		</style>
+
+	</head>
+	<script type="text/javascript">
+		//验证当前密码
+		function VerifyPassword(node) {
+			var password = node.value;
+			// alert(node.value)
+			var userid = localStorage.userid;
+			// alert(userid)
+			layui.use('form', function() {
+				// layer.msg(userid)
+				var form = layui.form;
+				var $ = layui.$;
+				$.ajax({
+					type: 'post',
+					url: 'UserController',
+					headers: {
+						"token": localStorage.token
+					},
+					data: {
+						userid: userid,
+						password: password,
+						method: "verifyAdminPassword"
+					},
+					dataType: 'json',
+					success: function(res) {
+						if (res.msg == "success") {
+							//密码正确
+						} else {
+							layer.msg("密码不正确，请重试")
+							node.value = "";
+						}
+					}
+				})
+			})
+		}
+	</script>
+
+	<script type="text/javascript">
+		//修改当前密码
+		var userid = localStorage.userid;
+		layui.use('form', function() {
+			var form = layui.form;
+			var $ = layui.$;
+			form.verify({
+				confirmPass: function(value) {
+					if ($('input[name=changed_password]').val() !== value)
+						return '两次密码输入不一致！';
+				}
+			});
+
+			//监听修改密码表单提交
+			form.on('submit(formDemo)', function(data) {
+				$.ajax({
+					type: 'post',
+					url: 'UserController',
+					headers: {
+						"token": localStorage.token
+					},
+					data: {
+						userid: userid,
+						password: data.field.changed_password,
+						method: "editAdminPassword"
+					},
+					dataType: 'json',
+					success: function(res) {
+						if (res.msg == "success") {
+							layer.msg("修改成功")
+							$("#edit_pwd")[0].reset();
+						} else {
+							RequestError();
+						}
+					}
+				})
+
+				return false;
+			});
+
+		});
+	</script>
+
+	<script type="text/javascript">
+		//获取基本信息
+		layui.use('form', function() {
+			var form = layui.form;
+			var $ = layui.$;
+
+			$.ajax({
+				type: 'post',
+				url: 'UserController',
+				headers: {
+					"token": localStorage.token
+				},
+				data: {
+					userid: userid,
+					method: "getAdminBaseInfo"
+				},
+				dataType: 'json',
+				success: function(res) {
+					if (res.msg == "success") {
+						// layer.msg(res.item[0].edit_phone)
+						//表单赋值
+						form.val("edit_baseinfo", res.item[0]);
+					} else {
+						RequestError();
+					}
+				}
+			});
+
+		});
+	</script>
+
+	<script type="text/javascript">
+		//监听基本信息提交
+		layui.use('form', function() {
+			var form = layui.form;
+			var $ = layui.$;
+			var userid = localStorage.userid;
+			form.on('submit(editfromDemo)', function(data) {
+				console.log(data.field)
+				$.ajax({
+					type: 'post',
+					url: 'UserController',
+					headers: {
+						"token": localStorage.token
+					},
+					data: {
+						userid: userid,
+						username: data.field.username,
+						phone: data.field.phone,
+						email: data.field.email,
+						method: "editAdminBaseInfo"
+					},
+					dataType: 'json',
+					success: function(res) {
+						if (res.msg == "success") {
+							//layer.msg('拼命执行中...', {icon: 16,shade: [0.5, '#f5f5f5'],scrollbar: false,offset: 'auto', time:1000});
+							layer.msg('修改成功！', {
+								time: 1000,
+								offset: 'auto'
+							});
+							form.val("edit_baseinfo", res.item[0]);
+							//window.location.reload(); //刷新页面
+						} else {
+							RequestError();
+						}
+					},
+				})
+				return false;
+			});
+		})
+	</script>
+	<body style="background-color: #F2F2F2;">
+		<div class="layui-row layui-col-space20">
+			<div class="layui-col-md12">
+				<div class="layui-card" style="background-color: #FFFFFF;">
+					<div class="layui-card-header">基本资料</div>
+					<div class="layui-card-body">
+						<div id="edit_person_div" style="margin-left: 8%;">
+							<form class="layui-form layui-form-pane" id="edit_baseinfo" lay-filter="edit_baseinfo">
+								<div class="layui-form-item">
+									<label class="layui-form-label">昵称</label>
+									<div class="layui-input-block">
+										<input type="text" id="username" name="username" lay-verify="required" placeholder="请输入昵称"
+										 autocomplete="off" class="layui-input" style="width: 250px;">
+									</div>
+								</div>
+								<div class="layui-form-item">
+									<label class="layui-form-label">手机号</label>
+									<div class="layui-input-block">
+										<input type="text" id="phone" name="phone" lay-verify="required|phone" placeholder="请输入手机号"
+										 autocomplete="off" class="layui-input" style="width: 250px;">
+									</div>
+								</div>
+								<div class="layui-form-item">
+									<label class="layui-form-label">邮箱</label>
+									<div class="layui-input-block">
+										<input type="text" id="email" name="email" lay-verify="email" placeholder="请输入邮箱" autocomplete="off"
+										 class="layui-input" style="width: 250px;">
+									</div>
+								</div>
+								<div class="layui-form-item">
+									<div class="layui-input-block">
+										<button class="layui-btn" type="button"  lay-submit lay-filter="editfromDemo">立即修改</button>
+										<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="layui-col-md12">
+				<div class="layui-card" style="background-color: #FFFFFF;">
+					<div class="layui-card-header">安全中心</div>
+					<div class="layui-card-body">
+						<div id="edit_person_div" style="margin-left: 8%;">
+							<form class="layui-form layui-form-pane" id="edit_pwd" lay-filter="edit_pwd">
+								<div class="layui-form-item">
+									<label class="layui-form-label">当前密码</label>
+									<div class="layui-input-block">
+										<input type="password" id="password" name="password" required lay-verify="required" placeholder="请输入当前密码"
+										 autocomplete="off" class="layui-input" style="width: 250px;" onblur="VerifyPassword(this)">
+									</div>
+								</div>
+								<div class="layui-form-item">
+									<label class="layui-form-label">新密码</label>
+									<div class="layui-input-block">
+										<input type="password" id="changed_password" name="changed_password" required lay-verify="required"
+										 placeholder="请输入新密码" autocomplete="off" class="layui-input" style="width: 250px;">
+									</div>
+								</div>
+								<div class="layui-form-item">
+									<label class="layui-form-label">确认密码</label>
+									<div class="layui-input-block">
+										<input type="password" id="changedtwo_password" name="changedtwo_password" required lay-verify="required|confirmPass"
+										 placeholder="请再次输入新密码" autocomplete="off" class="layui-input" style="width: 250px;">
+									</div>
+								</div>
+								<div class="layui-form-item">
+									<div class="layui-input-block">
+										<button class="layui-btn" type="button"  lay-submit lay-filter="formDemo">立即修改</button>
+										<button type="reset" class="layui-btn layui-btn-primary">重置</button>
+									</div>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

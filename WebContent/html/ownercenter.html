@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+<script type="text/javascript" src="../res/layui/layui.js"></script>
+<script src="../js/jquery-3.5.1.js"></script>
+<link rel="stylesheet" type="text/css" href="../res/layui/css/layui.css">
+</head>
+<body>
+	<div class="layui-form">
+	<div class="layui-form-item">
+    <label class="layui-form-label">用户id：</label>
+    <div class="layui-input-block">
+      <input type="text" id="userid" name="userid" lay-verify="userid" readonly="readonly" autocomplete="off" class="layui-input">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">用户名：</label>
+    <div class="layui-input-block">
+      <input type="text" id="username" name="username" lay-verify="username" autocomplete="off" class="layui-input">
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+    <label class="layui-form-label">性别：</label>
+    <div class="layui-input-block">
+      <input class="sex" type="radio" name="sex" value="男" title="男"><div class="layui-unselect layui-form-radio"><i class="layui-anim layui-icon layui-anim-scaleSpring"></i><div>男</div></div>
+      <input class="sex" type="radio" name="sex" value="女" title="女"><div class="layui-unselect layui-form-radio"><i class="layui-anim layui-icon"></i><div>女</div></div>
+    </div>
+  </div>
+  
+  <div class="layui-form-item">
+    <label class="layui-form-label">电话号码：</label>
+    <div class="layui-input-block">
+      <input type="text" id="phone" name="phone" lay-verify="phone" autocomplete="off" class="layui-input">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">邮箱：</label>
+    <div class="layui-input-block">
+      <input type="text" id="email" name="email" lay-verify="email" autocomplete="off" class="layui-input">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">创建时间：</label>
+    <div class="layui-input-block">
+      <input type="text" id="createtime" name="createtime" lay-verify="createtime" readonly="readonly" autocomplete="off" class="layui-input">
+    </div>
+  </div>
+  <div class="layui-form-item">
+    <label class="layui-form-label">审核状态：</label>
+    <div class="layui-input-block">
+      <input type="text" id="status" name="status" lay-verify="status" readonly="readonly" autocomplete="off" class="layui-input">
+    </div>
+  </div>
+  <button class="layui-btn" lay-submit lay-filter="change" style="float:right">确认修改</button>
+  </div>
+</body>
+<script type="text/javascript">
+var username;
+var phone;
+var sex;
+var email;
+var that = this;
+
+layui.use(['form'],function(){
+      var form = layui.form
+      var here;
+      $.ajax({
+    		type : "post",
+    	    async : false,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+    	    url : "http://localhost:8080/ShoppingMall/html/UserController",
+    	    data : {
+    	    	"method":"getOwner",
+    	    },
+    	    headers: {
+    	    	"token":localStorage.token
+    	    },
+    	    dataType : "json",        //返回数据形式为json
+    	    success : function(result) {
+    	    	if(result.msg == "success"){		//验证成功
+    	    		var userid = document.getElementById('userid')
+    	    		var username = document.getElementById('username')
+    	    		var sex = document.getElementsByClassName('sex')
+    	    		var createtime = document.getElementById('createtime')
+    	    		var phone = document.getElementById('phone')
+    	    		var email = document.getElementById('email')
+    	    		var status = document.getElementById('status')
+    	    		username.value = result.item.username
+    	    		userid.value = result.item.userid
+    	    		createtime.value = result.item.createtime
+    	    		$("input:radio[value='"+result.item.sex+"']").prop('checked','checked')
+    	    		phone.value = result.item.phone
+    	    		email.value = result.item.email
+    	    		status.value = result.item.status
+    	    		form.render(); //更新全部
+    	    	}else{
+    	    		localStorage.token = "";
+    	    		window.location.href="./login.html"; 
+    	    	}
+    	    },
+    	    error : function(errorMsg) {
+    	        
+    	    }
+    	})
+    	form.on('submit(change)', function(data){
+    		  console.log(data.elem) //被执行事件的元素DOM对象，一般为button对象
+    		  console.log(data.form) //被执行提交的form对象，一般在存在form标签时才会返回
+    		  console.log(data.field) //当前容器的全部表单字段，名值对形式：{name: value}
+    		  layer.confirm('确认修改吗?', function(index){
+    			  changeinfo(data.field.username , data.field.sex , data.field.phone , data.field.email)
+    			  layer.close(index);
+    			});       
+    		});
+});
+
+	function changeinfo(username , sex , phone , email){
+		$.ajax({
+    		type : "post",
+    	    async : false,            //异步请求（同步请求将会锁住浏览器，用户其他操作必须等待请求完成才可以执行）
+    	    url : "http://localhost:8080/ShoppingMall/html/UserController",
+    	    data : {
+    	    	"method":"updateUser",
+    	    	"username":username,
+    	    	"sex":sex,
+    	    	"phone":phone,
+    	    	"email":email
+    	    },
+    	    headers: {
+    	    	"token":localStorage.token
+    	    },
+    	    dataType : "json",        //返回数据形式为json
+    	    success : function(result) {
+    	    	if(result.msg == "success"){		//验证成功
+    	    		layer.msg('修改成功！')
+    	    	}else{
+    	    		localStorage.token = "";
+    	    		window.location.href="./login.html"; 
+    	    	}
+    	    },
+    	    error : function(errorMsg) {
+    	        
+    	    }
+    	})
+	}
+
+</script>
+</html>

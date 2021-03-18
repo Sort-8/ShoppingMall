@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Insert title here</title>
+		<script type="text/javascript" src="../res/js/echarts.min.js"></script>
+	</head>
+	<body>
+		<div id="salesContent">
+			<div id="type_sales" style="width: 600px;height:400px;float: left;"></div>
+			<div id="time_sales" style="width: 600px;height:400px;float: left;"></div>
+		</div>
+
+		<script type="text/javascript">
+			// 基于准备好的dom，初始化echarts实例
+			var myChart = echarts.init(document.getElementById('type_sales'));
+			// 指定图表的配置项和数据
+			var option = {
+				title: {
+					text: '商城品类销量'
+				},
+				tooltip: {},
+				legend: {
+					data: ['销量']
+				},
+				xAxis: {
+					data: ["奶粉辅食", "儿童用品", "儿童早教", "儿童服饰", "孕妈专区"]
+				},
+				yAxis: {},
+				series: [{
+					name: '销量',
+					type: 'bar',
+					data: [5, 20, 36, 10, 50]
+				}]
+			};
+			// 使用刚指定的配置项和数据显示图表。
+			myChart.setOption(option);
+		</script>
+		<script type="text/javascript">
+			// 基于准备好的dom，初始化echarts实例
+			var myChart = echarts.init(document.getElementById('time_sales'));
+			// 指定图表的配置项和数据
+			var option = {
+				title: {
+					text: '商城品类销量'
+				},
+				tooltip: {},
+				legend: {
+					data: ['销量']
+				},
+				xAxis: {
+					data: ["奶粉辅食", "儿童用品", "儿童早教", "儿童服饰", "孕妈专区"]
+				},
+				yAxis: {},
+				series: [{
+					name: '销量',
+					type: 'bar',
+					data: [5, 20, 36, 10, 50]
+				}]
+			};
+			// 使用刚指定的配置项和数据显示图表。
+			myChart.setOption(option);
+			console.log(option)
+		</script>
+	</body>
+</html>

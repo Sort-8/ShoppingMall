@@ -1,0 +1,12 @@
+{
+	"code": "0",
+	"msg":"success",
+	"item": {
+		"todaysales":"1102.43",
+		"rate":"12%",
+		"waitComment":"3904",
+		"waitShops":"2139",
+		"waitUser":"4983",
+		"waitDeliver":"3892"
+	}
+}

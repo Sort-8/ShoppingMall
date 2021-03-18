@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>用户管理</title>
+		<link rel="stylesheet" type="text/css" href="../res/layui/css/layui.css" />
+		<script type="text/javascript" src="../res/js/echarts.min.js"></script>
+		<script type="text/javascript" src="../res/js/jquery-3.5.1.js"></script>
+		<script type="text/javascript" src="../res/layui/layui.js"></script>
+	</head>
+	<script type="text/javascript">
+		//跳转到登录界面
+		function jumpLogin() {
+			window.parent.location.href = "adminlogin.html";
+			window.location.close();
+		}
+	</script>
+
+	<script type="text/javascript">
+		//判断是否已登录，防止跨域请求
+		$(function() {
+			if (localStorage.userid != undefined) {
+				var userid = localStorage.userid;
+			} else {
+				alert("请登录");
+				jumpLogin();
+			}
+		});
+	</script>
+
+	<script type="text/javascript">
+		//会话过期函数
+		function RequestError() {
+			localStorage.clear();
+			alert("会话已过期，请登录");
+			jumpLogin();
+		}
+	</script>
+
+	<style type="text/css">
+		/*设置数据表表头*/
+		.layui-table th {
+			text-align: center;
+			/*表头居中*/
+		}
+
+		.layui-table td {
+			text-align: center;
+			/*表格数据居中*/
+		}
+	</style>
+
+	<script type="text/html" id="barDemo">
+		<a class="layui-btn layui-btn-xs" lay-event="edit">审核</a>
+	</script>
+
+	<script type="text/javascript">
+		layui.use('table', function() {
+			var table = layui.table;
+			var tableIns = table.render({
+				elem: '#adminuser_table',
+				url: 'UserController',
+				method: 'post',
+				title: 'adminuser_table',
+				headers: {
+					"token": localStorage.token
+				},
+				cols: [
+					[ //表格字段参数
+						{
+							field: 'userid',
+							title: '用户帐号',
+							width: 180,
+							fixed: 'left',
+							sort: true
+						}, {
+							field: 'username',
+							title: '用户名',
+							width: 120
+						}, {
+							field: 'sex',
+							title: '性别',
+							width: 60
+						}, {
+							field: 'phone',
+							title: '手机号',
+							width: 150
+						}, {
+							field: 'email',
+							title: '邮箱',
+							width: 200
+						}, {
+							field: 'createtime',
+							title: '创建时间',
+							width: 180,
+							sort: true
+						}, {
+							field: 'status',
+							title: '状态',
+							width: 120
+						}, {
+							fixed: 'right',
+							title: '操作',
+							toolbar: '#barDemo',
+							width: 160
+						}
+					]
+				],
+				page: true,
+				where: {
+					method: "getAllUser",
+				},
+				parseData: function(res) { //将原始解析成layui支持的数据
+					if (res.msg != "success") {
+						RequestError();
+					}
+					if (this.page.curr) {
+						result = res.item.slice(this.limit * (this.page.curr - 1), this.limit * this.page.curr);
+					} else {
+						result = res.item.slice(0, this.limit);
+					}
+					return {
+						"code": res.code, //解析接口状态
+						"msg": res.msg, //解析提示文本
+						"data": result, //解析数据列表
+						"count": res.item.length
+					};
+				},
+
+			})
+
+			//组合搜索+模糊搜索
+			var $ = layui.$,
+				active = {
+					reload: function() {
+						var selected_sex = $('#selected_sex');
+						var username = $('#username');
+						var phone = $('#phone');
+						tableIns.reload({
+							headers: {
+								"token": localStorage.token
+							},
+							page: {
+								curr: 1 //重新从第 1 页开始
+							},
+							where: {
+								sex: selected_sex.val(),
+								username: username.val(),
+								phone: phone.val(),
+								method: "searchUsers"
+							}
+						}, 'data');
+					}
+				};
+
+			/*绑定搜索点击事件*/
+			$('#searchBtn').on('click', function() {
+				var type = $(this).data('type');
+				active[type] ? active[type].call(this) : '';
+			});
+
+			//监听行工具
+			table.on('tool(adminuser_table)', function(obj) {
+				var data = obj.data; //拿到选中的一行数据
+				console.log(data)
+				var status = data.status;
+				console.log(status)
+				var userid = data.userid
+				switch (obj.event) {
+					case 'edit':
+						if (status == "未审核") {
+							layer.confirm('确定通过审核吗？', {
+								title: '审核'
+							}, function(index) {
+								$.ajax({
+									type: 'post',
+									url: 'UserController',
+									headers: {
+										"token": localStorage.token
+									},
+									data: {
+										userid: userid,
+										status: "已审核",
+										method: "editUserStatus"
+									},
+									success: function(res) {
+										if (res.msg == "success") {
+											layer.msg("审核成功");
+										} else {
+											RequestError();
+										}
+										table.reload('adminuser_table', {})
+									}
+								})
+								layer.close(index);
+							});
+						} else if (status == "已审核") {
+							layer.msg("该用户以通过审核，无需重复审核", {
+								time: 2000,
+							})
+						}
+				}
+			})
+		})
+	</script>
+	<body>
+		<div class="layui-row layui-col-space20">
+			<div class="layui-col-md12">
+				<div class="layui-card" style="background-color: #FFFFFF;">
+					<div class="layui-card-header">组合搜索</div>
+					<div class="layui-card-body">
+						<div class="demoTable">
+							<form class="layui-form layui-form-pane" method="post" id="searchshops">
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">用户名</label>
+									<div class="layui-input-block" style="width: 200px;">
+										<input id="username" name="username" placeholder="请输入用户名" autocomplete="off" class="layui-input">
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">性别</label>
+									<div class="layui-input-block" style="width: 150px;">
+										<select id="selected_sex">
+											<option value="">请选择性别</option>
+											<option value="男">男</option>
+											<option value="女">女</option>
+										</select>
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<label class="layui-form-label">手机号</label>
+									<div class="layui-input-block" style="width: 200px;">
+										<input id="phone" name="phone" placeholder="请输入手机号" autocomplete="off" class="layui-input">
+									</div>
+								</div>
+								<div class="layui-form-item layui-inline">
+									<!-- 一定要加 type="button" 否则这个button标签会自动重载表格  -->
+									<button type="button" id="searchBtn" class="layui-btn layui-inline" data-type="reload" style="margin-left: 15px">
+										<i class="layui-icon layui-icon-search">查询</i>
+									</button>
+									<button type="reset" class="layui-btn layui-inline" style="width: 93px;">重置</button>
+								</div>
+							</form>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<table class="layui-hide" id="adminuser_table" lay-filter="adminuser_table"></table>
+
+	</body>
+</html>

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>个人中心</title>
+		<link rel="stylesheet" type="text/css" href="../res/layui/css/layui.css">
+		<script src="../js/jquery-3.5.1.js"></script>
+		<script type="text/javascript" src="../res/layui/layui.js"></script>
+		<script type="text/javascript" src="../res/layui/lay/modules/form.js"></script>
+	</head>
+	<style type="text/css">
+		body {
+			font-family: "Microsoft YaHei", "SimSun", '\5b8b\4f53', sans-serif;
+			-moz-user-select: none;
+			-webkit-user-select: none;
+			-ms-user-select: none;
+			background-color: #F5F5F5;
+		}
+
+		.w1200 {
+			width: 1200px;
+			margin: 0 auto;
+		}
+
+		.nobor {
+			border-bottom: 0 !important;
+		}
+
+		.margin0 {
+			margin: 0 !important;
+		}
+
+		.padding0 {
+			padding: 0 !important;
+		}
+
+		i {
+			font-style: normal;
+		}
+
+		/*site-nav*/
+		.site-nav-bg {
+			height: 30px;
+			line-height: 30px;
+			background-color: #f5f5f5;
+		}
+
+		.site-nav {
+			position: relative;
+		}
+
+		.sn-back-home {
+			float: left;
+		}
+
+		.sn-back-home i {
+			margin: 0 4px 0 8px;
+			font-size: 14px;
+		}
+
+		.sn-quick-menu {
+			position: absolute;
+			right: 12px;
+		}
+
+		.sn-quick-menu div {
+			float: left;
+		}
+
+		.sn-quick-menu div.login {
+			margin-right: 22px;
+		}
+
+		.sn-quick-menu div.login a {
+			color: #ff5500;
+		}
+
+		.sn-quick-menu div.sp-cart span {
+			margin-left: 4px;
+			color: #ff5500;
+			font-weight: bold;
+		}
+
+		/*end-site-nav*/
+
+		/*header*/
+		.header {
+			height: 100px;
+			line-height: 100px;
+		}
+
+		.header .mallLogo {
+			margin-left: 38px;
+			float: left;
+		}
+
+		.header .mallSearch {
+			float: right;
+			width: 500px;
+			padding-top: 30px;
+			position: relative;
+		}
+
+		.header .mallSearch form {
+			height: 38px;
+			line-height: 38px;
+			border-width: 1px 0 1px 1px;
+			border: solid #cfb2f6;
+			position: relative;
+		}
+
+		.header .mallSearch input {
+			height: 38px;
+			line-height: 38px;
+			width: 436px;
+			float: left;
+			border: none;
+			position: relative;
+			z-index: 2;
+			background: none;
+		}
+
+		.header .mallSearch button {
+			width: 58px;
+			height: 38px;
+			line-height: 38px;
+			float: left;
+			background: #cfb2f6;
+			border-radius: 0;
+		}
+
+		/*end-header*/
+	</style>
+
+	<body>
+		<div class="site-nav-bg">
+			<div class="site-nav w1200">
+				<p class="sn-back-home">
+					<i class="layui-icon layui-icon-home"></i>
+					<a href="./commodity.html">首页</a>
+				</p>
+				<div class="sn-quick-menu">
+        			<a href="shopcart.html">购物车</a>
+      			</div>
+			</div>
+		</div>
+
+		<div class="header">
+			<div class="headerLayout w1200">
+				<div class="headerCon">
+					<h1 class="mallLogo">
+						<a href="#" title="母婴商城">
+							<img src="../res/static/img/logo.png">
+						</a>
+					</h1>
+				</div>
+			</div>
+		</div>
+
+		<div class="content layui-container" style="width: 90%;  line-height: 30px;">
+			<div id="sub" style="width: 100px;">
+				<div id="menu" style="float: left;">
+					<dl class="fore1">
+						<dd id="">
+							<a onclick="changeHtml('ownercenter')">个人中心</a>
+						</dd>
+					</dl>
+					<dl class="fore1">
+						<dd id="">
+							<a onclick="changeHtml('myorder')">我的订单</a>
+						</dd>
+					</dl>
+				</div>
+			</div>
+			<div id="main" style=" float: left; margin-left: 10px;">
+				<iframe src="./ownercenter.html" width="1200px" height="600px" frameborder="0"></iframe>
+			</div>
+		</div>
+	</body>
+	<script>
+	function changeHtml(title){
+		let url = "";
+		switch(title){
+		case 'ownercenter' : url = "./ownercenter.html";break;
+		case 'myorder': url = "./myorder.html";break;
+		}
+		$('iframe').attr('src',url);
+	}
+	</script>
+</html>

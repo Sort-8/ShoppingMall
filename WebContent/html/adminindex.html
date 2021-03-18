@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>后台首页</title>
+		<meta name="renderer" content="webkit">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+		<link rel="stylesheet" type="text/css" href="../res/layui/css/layui.css">
+		<script type="text/javascript" src="../res/layui/layui.js"></script>
+		<script type="text/javascript" src="../res/js/jquery-3.5.1.js"></script>
+	</head>
+	<script type="text/javascript">
+		$(function() {
+			if (localStorage.userid != undefined) {
+				var userid = localStorage.userid;
+				var power = localStorage.power;
+				if (power == "3") {
+					var admininfo = '<a href="javascript:;" onclick="changeshow(\'admininfo\')">管理员设置</a>';
+					document.getElementById('admininfo').innerHTML = admininfo;
+				}
+				document.getElementById('username').innerText = userid;
+			} else {
+				alert("请先登录");
+				window.parent.location.href = "adminlogin.html";
+				window.location.close();
+			}
+		});
+	</script>
+	<script type="text/javascript">
+		function loginout() {
+			window.localStorage.clear();
+		}
+	</script>
+	<script type="text/javascript">
+		var that = this;
+
+		function changeshow(title) {
+			that.title = title;
+			let url = "";
+			switch (title) {
+				case 'adminconsole':
+					url = "adminconsole.html";
+					break;
+				case 'adminshops':
+					url = "adminshops.html";
+					break;
+				case 'admintype':
+					url = "admintype.html";
+					break;
+				case 'adminuser':
+					url = "adminuser.html";
+					break;
+				case 'admincomment':
+					url = 'admincomment.html';
+					break;
+				case 'adminorder':
+					url = "adminorder.html";
+					break;
+				case 'adminbaseinfo':
+					url = "adminbaseinfo.html";
+					break;
+				case 'admininfo':
+					url = "admininfo.html";
+					break;
+			}
+			$('iframe').attr('src', url);
+		}
+	</script>
+	<body class="layui-layout-body" style="background-color: #F2F2F2;">
+		<div class="layui-layout layui-layout-admin">
+			<div class="layui-header">
+				<div class="layui-logo"><a href="adminindex.html" style="color: #009E94;">商城后台管理</a></div>
+				<!-- 头部区域（可配合layui已有的水平导航） -->
+				<ul class="layui-nav layui-layout-right">
+					<li class="layui-nav-item">
+						<a href="javascript:;">
+							<div><span id="username"></span>用户，欢迎您！</div>
+							<dl class="layui-nav-child">
+								<dd>
+									<a id="name" href="javascript:;" onclick="changeshow('adminbaseinfo')">基本资料</a>
+								</dd>
+							</dl>
+					</li>
+					<li class="layui-nav-item"><a href="adminlogin.html" onclick="loginout()">退出</a></li>
+				</ul>
+
+			</div>
+			<div class="layui-side layui-bg-black">
+				<div class="layui-side-scroll" lay-filter="tab_all">
+					<!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+					<ul class="layui-nav layui-nav-tree">
+						<li id="adminconsole" class="layui-nav-item layui-this"><a href="javascript:;" onclick="changeshow('adminconsole')">控制台</a></li>
+						<li id="adminshops" class="layui-nav-item">
+							<a class="" href="javascript:;">商品</a>
+							<dl class="layui-nav-child">
+								<dd><a href="javascript:;" onclick="changeshow('admintype')">类目管理</a></dd>
+								<dd><a href="javascript:;" onclick="changeshow('adminshops')">商品管理</a></dd>
+							</dl>
+						</li>
+						<li id="adminuser" class="layui-nav-item">
+							<a href="javascript:;">用户</a>
+							<dl class="layui-nav-child">
+								<dd><a href="javascript:;" onclick="changeshow('adminuser')">用户管理</a></dd>
+								<dd><a href="javascript:;" onclick="changeshow('admincomment')">评论管理</a></dd>
+							</dl>
+						</li>
+						<li id="adminorder" class="layui-nav-item"><a href="javascript:;" onclick="changeshow('adminorder')">订单</a></li>
+						<li id="name" class="layui-nav-item">
+							<a href="javascript:;">设置</a>
+							<dl class="layui-nav-child">
+								<dd><a href="javascript:;" onclick="changeshow('adminbaseinfo')">个人中心</a></dd>
+								<dd id="admininfo"></dd>
+							</dl>
+						</li>
+					</ul>
+				</div>
+			</div>
+			<div class="layui-body">
+				<!-- 内容主体区域 -->
+				<div style="padding: 15px;">
+					<iframe id="adminconsole" src="adminconsole.html" frameborder="0" style="width:100%; height:600px;"></iframe>
+					<script type="text/html" id="barDemo">
+						<a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+						<a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+					</script>
+				</div>
+			</div>
+		</div>
+		<script>
+			//JavaScript代码区域
+			layui.use('element', function() {
+				var element = layui.element;
+			});
+		</script>
+	</body>
+</html>
