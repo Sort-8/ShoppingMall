@@ -114,10 +114,9 @@ public class GoodsDao {
 		return list;
 	}
 	
-	public List<Goods> findAllGoods(){
+	public List<Goods> findAllGoods(String params){
 		goodsList = new ArrayList<Goods>();
-		sql = "select * from " + Constant.GoodsTable;
-		st = DBUtil.getPreparedStatement(sql);
+		st = DBUtil.getPreparedStatement(params);
 		try {
 			rsSet = st.executeQuery();
 			if(!rsSet.next()) {
@@ -125,19 +124,21 @@ public class GoodsDao {
 			}else {
 				do {
 					goods = new Goods();
-					goods.setGoodsid(rsSet.getInt(1));
-					goods.setTitle(rsSet.getString(2));
-					goods.setCount(rsSet.getInt(3));
-					goods.setParameterid(rsSet.getInt(4));
-					goods.setImg(rsSet.getString(5));
-					goods.setPrice(rsSet.getFloat(6));
-					goods.setOriginal(rsSet.getFloat(7));
-					goods.setDiscount(rsSet.getFloat(8));
-					goods.setPaycount(rsSet.getString(9));
-					goods.setCollectcount(rsSet.getInt(10));
-					goods.setSale_count(rsSet.getInt(11));
-					goods.setCre_time(rsSet.getString(12));
-					goods.setMod_time(rsSet.getString(13));
+					goods.setCollectcount(rsSet.getInt("collectcount"));
+					goods.setCount(rsSet.getInt("count"));
+					goods.setCre_time(rsSet.getString("cre_time"));
+					goods.setDiscount(rsSet.getInt("discount"));
+					goods.setGoodsid(rsSet.getInt("goodsid"));
+					goods.setImg(rsSet.getString("img"));
+					goods.setDetailsimg(rsSet.getString("detailsimg"));
+					goods.setMod_time(rsSet.getString("mod_time"));
+					goods.setOriginal(rsSet.getFloat("original"));
+					goods.setParameterid(rsSet.getInt("parameterid"));
+					goods.setPrice(rsSet.getFloat("price"));
+					goods.setSale_count(rsSet.getInt("sale_count"));
+					goods.setTitle(rsSet.getString("title"));
+					goods.setTypeid(rsSet.getString("typeid"));
+					goods.setPaycount(rsSet.getString("paycount"));
 					goodsList.add(goods);
 				}while(rsSet.next());
 			}

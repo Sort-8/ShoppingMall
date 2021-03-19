@@ -96,7 +96,7 @@
 						}, {
 							field: 'goodsid',
 							title: '商品编号',
-							width: 250,
+							width: 150,
 							sort: true
 						}, {
 							field: 'title',
@@ -104,9 +104,13 @@
 							width: 180
 						}, {
 							field: 'type',
-							title: '商品类别',
+							title: '商品类目',
 							width: 150
 						}, {
+							field: 'name',
+							title: '商品类别',
+							width: 150
+						},{
 							field: 'img',
 							title: '图片',
 							width: 130,
@@ -233,6 +237,7 @@
 										data: {
 											goodstitle: layero.find("#add_name").val(),
 											goodstype: layero.find("#add_type").val(),
+											goodsname: layero.find("#add_shopname").val(),
 											goodsprice: layero.find("#add_price").val(),
 											goodssize: layero.find("#add_size").val(),
 											goodscolor: layero.find("#add_color").val(),
@@ -345,6 +350,7 @@
 						success: function(layero, index) {
 							layero.find("#add_name").val(data.title); //赋值
 							layero.find("#add_type").val(data.type); //赋值
+							layero.find("#add_shopname").val(data.name); //赋值
 							layero.find("#add_price").val(data.price); //赋值
 							layero.find("#add_count").val(data.count); //赋值
 						},
@@ -364,6 +370,7 @@
 									"goodsid": goodsid, //原商品名称
 									"goodstitle": layero.find("#add_name").val(), //更名后的商品名称
 									"goodstype": layero.find("#add_type").val(), //更名后的商品类型
+									"goodsname": layero.find("#add_shopname").val(), //更名后的商品类型
 									"goodsprice": layero.find("#add_price").val(), //更名后的商品单价
 									"goodssize": layero.find("#add_size").val(), //更名后的商品规格
 									"goodscount": layero.find("#add_count").val(), //更名后的商品规格
@@ -411,9 +418,9 @@
 									</div>
 								</div>
 								<div class="layui-form-item layui-inline">
-									<label class="layui-form-label">商品类别</label>
+									<label class="layui-form-label">商品类目</label>
 									<div class="layui-input-block" style="width: 200px;">
-										<input id="shopstype" name="shopstype" placeholder="请输入商品类别" autocomplete="off" class="layui-input">
+										<input id="shopstype" name="shopstype" placeholder="请输入商品类目" autocomplete="off" class="layui-input">
 									</div>
 								</div>
 								<div class="layui-form-item layui-inline">
@@ -442,9 +449,16 @@
 					</div>
 				</div>
 				<div class="layui-form-item">
-					<label class="layui-form-label">商品类型</label>
+					<label class="layui-form-label">商品类目</label>
 					<div class="layui-input-block">
 						<input type="text" id="add_type" name="add_type" required lay-verify="required" placeholder="请输入商品类别"
+						 autocomplete="off" class="layui-input" style="width: 250px;">
+					</div>
+				</div>
+				<div class="layui-form-item">
+					<label class="layui-form-label">商品类别</label>
+					<div class="layui-input-block">
+						<input type="text" id="add_shopname" name="add_shopname" required lay-verify="required" placeholder="请输入商品类别"
 						 autocomplete="off" class="layui-input" style="width: 250px;">
 					</div>
 				</div>

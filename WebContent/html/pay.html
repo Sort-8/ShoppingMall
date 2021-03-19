@@ -397,20 +397,33 @@ function GetRequest() {
   
   function readyPay(){
 	  console.log(that.name)
-	  if(that.name != "null"){
+	  if(that.name != "null"){ 
 		  //layer.msg('请确认收货地址')
-	  }else{
-		  //layer.msg('可以支付了')
-		  //layer.msg('发送ajax请求');
-		  alert(212)
-		  var out_trade_no = "213847854"; //订单号(必填)
+	  }else if(status!="已支付"){ //订单已支付
+	  	alert("订单已支付");
+	  	$.ajax({
+	  		type:'post',
+	  		url:'TestController',
+	  		dataType:'json',
+	  		data:{
+	  			method:'searchOrder',
+	  			out_trade_no:'312315',
+	  		},
+	  		success:function(res){
+	  			console.log(res);
+	  		}
+	  	})
+	  }else{ //订单未支付
+		  var out_trade_no = "312315"; //订单号(必填)
 		  var total_amount = "146";//金额(必填)
 		  var subject = "124876";//订单名称(必填)
-		  var body = "12324";//商品描述，(选填)
+		  var body = "12324";//商品描述，(选填,可空)
+		  var method = "AliPay"; //支付方法(必填)
 		  window.parent.location.href = "http://localhost:8080/ShoppingMall/html/TestController"
 		  + "?method=Alipay&out_trade_no="+out_trade_no+"&total_amount="+total_amount
 	  	  + "&subject="+subject+"&body="+body;
 	  }
+		 
   }
   
   function del(addressid){

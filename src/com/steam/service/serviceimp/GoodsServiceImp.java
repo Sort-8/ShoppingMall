@@ -40,17 +40,19 @@ public class GoodsServiceImp {
 	
 	/**
 	 * 庞海
-	 * 获取所有商品信息
+	 * 后台获取所有商品信息
 	 * @return List<Goods>
 	 */
 	public List<Goods> getAllShops(){
 		goodsDao = new GoodsDao();
-		return goodsDao.findAllGoods();
+		String params = "SELECT * from goods,types WHERE"
+				+ " goods.typeid = types.typeid and goods.typeid = types.typeid;";
+		return goodsDao.findAllGoods(params);
 	}
 	
 	/**
 	 * 庞海
-	 * 搜索商品信息
+	 * 后台搜索商品信息
 	 * @param shopsid 商品编号
 	 * @param shopstitle 商品名
 	 * @param shopstype 商品类型
@@ -64,14 +66,14 @@ public class GoodsServiceImp {
 		shopstitle = shopstitle == null ? "" : shopstitle;
 		shopstype = shopstype == null ? "" : shopstype;
 		params = "select * from " + Constant.GoodsTable + " where goodsid like '"+shopsid+"%'"
-				+ " and title like '"+shopstitle+"%' and type like '"+shopstype+"%'";
+				+ " and title like '"+shopstitle+"%' and typeid like '"+shopstype+"%'";
 		goodsList = goodsDao.selectGoods(params);
 		return goodsList;
 	}
 	
 	/**
 	 * 庞海
-	 * 添加商品信息
+	 * 后台添加商品信息
 	 * @param goodsname
 	 * @param goodstype
 	 * @param goodsprice
@@ -118,7 +120,7 @@ public class GoodsServiceImp {
 	
 	/**
 	 * 庞海
-	 * 批量删除商品
+	 * 后台批量删除商品
 	 * @param list
 	 * @return boolean
 	 */
@@ -143,7 +145,7 @@ public class GoodsServiceImp {
 	
 	/**
 	 * 庞海
-	 * 删除商品信息
+	 * 后台删除商品信息
 	 * @param goodsid
 	 * @return boolean
 	 */
@@ -160,7 +162,7 @@ public class GoodsServiceImp {
 	
 	/**
 	 * 庞海
-	 * 编辑商品信息
+	 * 后台编辑商品信息
 	 * @param goodsid
 	 * @param goodsname
 	 * @param goodstype

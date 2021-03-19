@@ -90,7 +90,6 @@ public class UserController extends HttpServlet{
 			}else {
 				print.change("" , response, "", false);
 			}
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

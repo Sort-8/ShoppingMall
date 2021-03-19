@@ -84,13 +84,12 @@ public class CommentDao {
 		return list;
 	}
 	
-	public List<Comment> selectComment(int commentid, String username, String content) {
+	public List<Comment> selectComment(String commentid, String username, String content) {
 		list = new ArrayList<Comment>();
-		sql = "select * from "+Constant.CommentTable+" where commentid like '?%' and "
+		sql = "select * from "+Constant.CommentTable+" where commentid like '"+commentid+"%' and "
 				+ "username like '"+username+"%' and comment like '"+content+"%'";
 		st = DBUtil.getPreparedStatement(sql);
 		try {
-			st.setInt(1, commentid);
 			rsSet = st.executeQuery();
 			if(rsSet.next()) {
 				do {
@@ -103,18 +102,13 @@ public class CommentDao {
 					comment.setStatus(rsSet.getString(6));
 					list.add(comment);
 				}while(rsSet.next());
+				rsSet.close();
+				st.close();
 			}else {
 				System.out.println("评论模块：查找所有评论的结果集为空");
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-		}finally{
-			try {
-				st.close();
-				rsSet.close();
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
 		}
 		return list;
 	}
@@ -140,10 +134,9 @@ public class CommentDao {
 	public int editCommentSatus(int commentid, String status) {
 		rs = -1;
 		sql = "update "+Constant.CommentTable+" set status='"+status+"'where"
-				+ " commentid";
+				+ " commentid='"+commentid+"'";
 		st = DBUtil.getPreparedStatement(sql);
 		try {
-			st.setInt(1, commentid);
 			rs = st.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();

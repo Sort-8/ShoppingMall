@@ -91,7 +91,7 @@ public class UserServiceImp implements IUser{
 
 	public boolean editAdminPassword(String userid, String password) {
 		userDao = new UserDao();
-		if(userDao.editAdminPassword(Integer.parseInt(userid), password)!=-1) {
+		if(userDao.editAdminPassword(userid, password)!=-1) {
 			return true;
 		}else {
 			return false;
@@ -103,7 +103,7 @@ public class UserServiceImp implements IUser{
 		userid = userid == null ? "" : userid;
 		username = username == null ? "" : username;
 		phone = phone == null ? "" : phone;
-		return userDao.selectAdmin(Integer.parseInt(userid), username, phone);
+		return userDao.selectAdmin(userid, username, phone);
 	}
 
 	public boolean VerifyUserid(String userid) {

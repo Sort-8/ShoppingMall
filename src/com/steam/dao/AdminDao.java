@@ -67,7 +67,7 @@ public class AdminDao {
 				do {
 					String power = rsSet.getString("power");
 					if(power!=null) {
-						if(power.equals("2")||power.equals("3")) {
+						if(power.equals("2")) {
 						admin = new User();
 						admin.setUserid(rsSet.getInt("userid"));
 						admin.setUsername(rsSet.getString("username"));
@@ -78,10 +78,10 @@ public class AdminDao {
 						admin.setHeadimg(rsSet.getString("headimg"));
 						admin.setPower(rsSet.getString("power"));
 						admin.setAddressid(rsSet.getString("addressid"));
-						admin.setShopcatid(rsSet.getString("shopcartid"));
-						admin.setOdersid(rsSet.getString("ordersid"));
+						admin.setShopcartid(rsSet.getString("shopcartid"));
+						admin.setAddressid(rsSet.getString("ordersid"));
 						admin.setHistoryid(rsSet.getString("historyid"));
-						admin.setComment(rsSet.getString("commentid"));
+						admin.setCommentid(rsSet.getString("commentid"));
 						adminList.add(admin);
 						}
 					}
