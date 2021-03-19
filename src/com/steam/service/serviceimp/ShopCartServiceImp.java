@@ -34,7 +34,7 @@ public class ShopCartServiceImp {
 		userServiceImp = new UserServiceImp();
 		shopCartDao = new ShopCartDao();
 		User user = userServiceImp.getUser(userid);
-		ids = (user.getShopcatid()).split(";");
+		ids = (user.getShopcartid()).split(";");
 		for(int i = 0 ; i < ids.length ; i++) {
 			shopcartid = shopCartDao.checkShopCart(Integer.parseInt(ids[i]) , type , goodsid);
 			if(!"".equals(shopcartid)) {
@@ -49,7 +49,7 @@ public class ShopCartServiceImp {
 		userServiceImp = new UserServiceImp();
 		shopCartDao = new ShopCartDao();
 		User user = userServiceImp.getUser(userid);
-		return shopCartDao.getShopCart(Integer.parseInt(user.getShopcatid()));
+		return shopCartDao.getShopCart(Integer.parseInt(user.getShopcartid()));
 	}
 	
 	public List showShopCart(String token) {

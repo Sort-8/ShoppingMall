@@ -10,8 +10,8 @@ public class User {
 	private String headimg;
 	private String power;
 	private String addressid;
-	private String shopcatid;
-	private String odersid;
+	private String shopcartid;
+	private String ordersid;
 	private String historyid;
 	private String commentid;
 	private String sex;
@@ -71,29 +71,23 @@ public class User {
 	public void setAddressid(String addressid) {
 		this.addressid = addressid;
 	}
-	public String getShopcatid() {
-		return shopcatid;
+	public String getShopcartid() {
+		return shopcartid;
 	}
-	public void setShopcatid(String shopcatid) {
-		this.shopcatid = shopcatid;
+	public void setShopcartid(String shopcartid) {
+		this.shopcartid = shopcartid;
 	}
-	public String getOdersid() {
-		return odersid;
+	public String getOrdersid() {
+		return ordersid;
 	}
-	public void setOdersid(String odersid) {
-		this.odersid = odersid;
+	public void setOrdersid(String ordersid) {
+		this.ordersid = ordersid;
 	}
 	public String getHistoryid() {
 		return historyid;
 	}
 	public void setHistoryid(String historyid) {
 		this.historyid = historyid;
-	}
-	public String getComment() {
-		return commentid;
-	}
-	public void setComment(String comment) {
-		this.commentid = comment;
 	}
 	public String getCommentid() {
 		return commentid;
@@ -119,14 +113,43 @@ public class User {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+	public User(int userid, String username, String password, String phone, String createtime, String modifytime,
+			String headimg, String power, String addressid, String shopcartid, String ordersid, String historyid,
+			String commentid, String sex, String email, String status) {
+		super();
+		this.userid = userid;
+		this.username = username;
+		this.password = password;
+		this.phone = phone;
+		this.createtime = createtime;
+		this.modifytime = modifytime;
+		this.headimg = headimg;
+		this.power = power;
+		this.addressid = addressid;
+		this.shopcartid = shopcartid;
+		this.ordersid = ordersid;
+		this.historyid = historyid;
+		this.commentid = commentid;
+		this.sex = sex;
+		this.email = email;
+		this.status = status;
+	}
+	public User() {
+		super();
+	}
 	@Override
 	public String toString() {
 		return "User [userid=" + userid + ", username=" + username + ", password=" + password + ", phone=" + phone
 				+ ", createtime=" + createtime + ", modifytime=" + modifytime + ", headimg=" + headimg + ", power="
-				+ power + ", addressid=" + addressid + ", shopcatid=" + shopcatid + ", odersid=" + odersid
+				+ power + ", addressid=" + addressid + ", shopcartid=" + shopcartid + ", ordersid=" + ordersid
 				+ ", historyid=" + historyid + ", commentid=" + commentid + ", sex=" + sex + ", email=" + email
-				+ ", status=" + status + "]";
+				+ ", status=" + status + ", getUserid()=" + getUserid() + ", getUsername()=" + getUsername()
+				+ ", getPassword()=" + getPassword() + ", getPhone()=" + getPhone() + ", getCreatetime()="
+				+ getCreatetime() + ", getModifytime()=" + getModifytime() + ", getHeadimg()=" + getHeadimg()
+				+ ", getPower()=" + getPower() + ", getAddressid()=" + getAddressid() + ", getShopcartid()="
+				+ getShopcartid() + ", getOrdersid()=" + getOrdersid() + ", getHistoryid()=" + getHistoryid()
+				+ ", getCommentid()=" + getCommentid() + ", getSex()=" + getSex() + ", getEmail()=" + getEmail()
+				+ ", getStatus()=" + getStatus() + ", getClass()=" + getClass() + ", hashCode()=" + hashCode()
+				+ ", toString()=" + super.toString() + "]";
 	}
-	
-	
 }

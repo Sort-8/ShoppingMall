@@ -17,7 +17,7 @@ public class CommentServiceImp {
 		commentid = commentid == null ? "" : commentid;
 		username = username == null ? "" : username;
 		comment = comment == null ? "" : comment;
-		return commentDao.selectComment(Integer.parseInt(commentid), username, comment);
+		return commentDao.selectComment(commentid, username, comment);
 	}
 	public boolean delComment(String commentid) {
 		commentDao = new CommentDao();

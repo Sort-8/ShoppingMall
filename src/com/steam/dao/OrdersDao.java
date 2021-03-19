@@ -158,7 +158,7 @@ public class OrdersDao {
 		}finally{
 			try {
 				st.close();
-				rsSet.close();
+//				rsSet.close(); //调整订单状态会报错，需删除
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}

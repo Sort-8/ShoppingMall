@@ -42,16 +42,16 @@ public class UserDao {
 			if(rsSet.next()) {
 					User user = new User(); //实体类
 					user.setAddressid(rsSet.getString("addressid"));
-					user.setComment(rsSet.getString("commentid"));
+					user.setCommentid(rsSet.getString("commentid"));
 					user.setCreatetime(rsSet.getString("createtime"));
 					user.setHeadimg(rsSet.getString("headimg"));
 					user.setHistoryid(rsSet.getString("historyid"));
 					user.setModifytime(rsSet.getString("modifytime"));
-					user.setOdersid(rsSet.getString("ordersid"));
+					user.setAddressid(rsSet.getString("ordersid"));
 					user.setPassword(rsSet.getString("password"));
 					user.setPhone(rsSet.getString("phone"));
 					user.setPower(rsSet.getString("power"));
-					user.setShopcatid(rsSet.getString("shopcartid"));
+					user.setShopcartid(rsSet.getString("shopcartid"));
 					user.setUserid(rsSet.getInt("userid"));
 					user.setUsername(rsSet.getString("username"));
 					user.setSex(rsSet.getString("sex"));
@@ -125,10 +125,10 @@ public class UserDao {
 						admin.setHeadimg(rsSet.getString("headimg"));
 						admin.setPower(rsSet.getString("power"));
 						admin.setAddressid(rsSet.getString("addressid"));
-						admin.setShopcatid(rsSet.getString("shopcartid"));
-						admin.setOdersid(rsSet.getString("ordersid"));
+						admin.setShopcartid(rsSet.getString("shopcartid"));
+						admin.setAddressid(rsSet.getString("ordersid"));
 						admin.setHistoryid(rsSet.getString("historyid"));
-						admin.setComment(rsSet.getString("commentid"));
+						admin.setCommentid(rsSet.getString("commentid"));
 						adminList.add(admin);
 						}
 					}
@@ -169,16 +169,16 @@ public class UserDao {
 			rsSet = st.executeQuery();
 			if(rsSet.next()) {
 				user.setAddressid(rsSet.getString("addressid"));
-				user.setComment(rsSet.getString("commentid"));
+				user.setCommentid(rsSet.getString("commentid"));
 				user.setCreatetime(rsSet.getString("createtime"));
 				user.setHeadimg(rsSet.getString("headimg"));
 				user.setHistoryid(rsSet.getString("historyid"));
 				user.setModifytime(rsSet.getString("modifytime"));
-				user.setOdersid(rsSet.getString("ordersid"));
+				user.setAddressid(rsSet.getString("ordersid"));
 				user.setPassword(rsSet.getString("password"));
 				user.setPhone(rsSet.getString("phone"));
 				user.setPower(rsSet.getString("power"));
-				user.setShopcatid(rsSet.getString("shopcartid"));
+				user.setShopcartid(rsSet.getString("shopcartid"));
 				user.setUserid(rsSet.getInt("userid"));
 				user.setUsername(rsSet.getString("username"));
 				user.setSex(rsSet.getString("sex"));
@@ -209,16 +209,16 @@ public class UserDao {
 				do {
 					user = new User();
 					user.setAddressid(rsSet.getString("addressid"));
-					user.setComment(rsSet.getString("commentid"));
+					user.setCommentid(rsSet.getString("commentid"));
 					user.setCreatetime(rsSet.getString("createtime"));
 					user.setHeadimg(rsSet.getString("headimg"));
 					user.setHistoryid(rsSet.getString("historyid"));
 					user.setModifytime(rsSet.getString("modifytime"));
-					user.setOdersid(rsSet.getString("odersid"));
+					user.setAddressid(rsSet.getString("ordersid"));
 					user.setPassword(rsSet.getString("password"));
 					user.setPhone(rsSet.getString("phone"));
 					user.setPower(rsSet.getString("power"));
-					user.setShopcatid(rsSet.getString("shopcatid"));
+					user.setShopcartid(rsSet.getString("shopcartid"));
 					user.setUserid(rsSet.getInt("userid"));
 					user.setUsername(rsSet.getString("username"));
 					user.setSex(rsSet.getString("sex"));
@@ -245,16 +245,16 @@ public class UserDao {
 				do {
 					user = new User();
 					user.setAddressid(rsSet.getString("addressid"));
-					user.setComment(rsSet.getString("commentid"));
+					user.setCommentid(rsSet.getString("commentid"));
 					user.setCreatetime(rsSet.getString("createtime"));
 					user.setHeadimg(rsSet.getString("headimg"));
 					user.setHistoryid(rsSet.getString("historyid"));
 					user.setModifytime(rsSet.getString("modifytime"));
-					user.setOdersid(rsSet.getString("odersid"));
+					user.setOrdersid(rsSet.getString("ordersid"));
 					user.setPassword(rsSet.getString("password"));
 					user.setPhone(rsSet.getString("phone"));
 					user.setPower(rsSet.getString("power"));
-					user.setShopcatid(rsSet.getString("shopcatid"));
+					user.setShopcartid(rsSet.getString("shopcartid"));
 					user.setUserid(rsSet.getInt("userid"));
 					user.setUsername(rsSet.getString("username"));
 					user.setSex(rsSet.getString("sex"));
@@ -273,7 +273,7 @@ public class UserDao {
 		list = new ArrayList<User>();
 		User user = null;
 		sql = "select * from "+Constant.UserTable+" where username like '"+username+"%' "
-				+ "and sex like'"+sex+"%' and phone like'"+phone+"%'";
+				+ "and sex like'"+sex+"%' and phone like'"+phone+"%' and power='1'";
 		st = DBUtil.getPreparedStatement(sql);
 		try {
 			rsSet = st.executeQuery();
@@ -283,16 +283,16 @@ public class UserDao {
 				do {
 					user = new User();
 					user.setAddressid(rsSet.getString("addressid"));
-					user.setComment(rsSet.getString("commentid"));
+					user.setCommentid(rsSet.getString("commentid"));
 					user.setCreatetime(rsSet.getString("createtime"));
 					user.setHeadimg(rsSet.getString("headimg"));
 					user.setHistoryid(rsSet.getString("historyid"));
 					user.setModifytime(rsSet.getString("modifytime"));
-					user.setOdersid(rsSet.getString("odersid"));
+					user.setAddressid(rsSet.getString("ordersid"));
 					user.setPassword(rsSet.getString("password"));
 					user.setPhone(rsSet.getString("phone"));
 					user.setPower(rsSet.getString("power"));
-					user.setShopcatid(rsSet.getString("shopcatid"));
+					user.setShopcartid(rsSet.getString("shopcartid"));
 					user.setUserid(rsSet.getInt("userid"));
 					user.setUsername(rsSet.getString("username"));
 					user.setSex(rsSet.getString("sex"));
@@ -375,28 +375,28 @@ public class UserDao {
 		return user;
 	}
 
-	public int editAdminPassword(int userid, String password) {
+	public int editAdminPassword(String userid, String password) {
 		rs = -1;
 		sql = "update "+Constant.UserTable+" set password=? where userid=?";
 		st = DBUtil.getPreparedStatement(sql);
 		try {
 			st.setString(1, password);
-			st.setInt(2, userid);
+			st.setString(2, userid);
 			rs = st.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
 		return rs;
 	}
-
-	public List<User> selectAdmin(int userid, String username, String phone) {
+	
+	public List<User> selectAdmin(String userid, String username, String phone) {
 		adminList = new ArrayList<User>();
 		User user = null;
-		sql = "select * from "+Constant.UserTable+" where userid like '?%' and"
-				+ " username like '"+username+"%' and phone like '"+phone+"%'";
+		sql = "select * from "+Constant.UserTable+" where userid like '"+userid+"%' and"
+				+ " username like '"+username+"%' and phone like '"+phone+"%' and power='2'";
 		st = DBUtil.getPreparedStatement(sql);
+		System.out.println(sql);
 		try {
-			st.setInt(1, userid);
 			rsSet = st.executeQuery();
 			if(!rsSet.next()) {
 				System.out.println("用户模块：查询所有用户数据的结果集为空");
@@ -413,6 +413,7 @@ public class UserDao {
 					user.setEmail(rsSet.getString("email"));
 					adminList.add(user);
 				}while(rsSet.next());
+				rsSet.close();
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
